@@ -16,14 +16,8 @@
     "typescript": "^7.0.2"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sharif Parish",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.5.1",
-      "onFail": "download"
-    }
-  },
+  "packageManager": "pnpm@11.5.1",
   "type": "module"
 }
