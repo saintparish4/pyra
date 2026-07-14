@@ -1,0 +1,15 @@
+{
+  "name": "@pyra/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@pyra/config": "workspace:*",
+    "eslint": "^9.28.0",
+    "typescript": "^7.0.2"
+  }
+}

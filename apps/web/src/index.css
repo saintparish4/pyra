@@ -1,0 +1,271 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
+
+:root {
+  --text: #6f6879;
+  --text-dim: #9a94a5;
+  --text-h: #0b0812;
+  --bg: #fdfcfe;
+  --surface: #ffffff;
+  --border: #e9e7ee;
+  --hairline: #efedf3;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.08);
+  --accent-border: rgba(170, 59, 255, 0.4);
+  --ok: #18944b;
+  --ok-glow: rgba(24, 148, 75, 0.18);
+  --err: #e5484d;
+  --err-glow: rgba(229, 72, 77, 0.18);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(11, 8, 18, 0.06) 0 24px 48px -16px, rgba(11, 8, 18, 0.04) 0 4px 12px -4px;
+  --shadow-sm: rgba(11, 8, 18, 0.05) 0 2px 8px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Black Ops One', system-ui;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/150% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #a29caf;
+    --text-dim: #6e6879;
+    --text-h: #f5f3f8;
+    --bg: #131118;
+    --surface: #1a1721;
+    --border: #2b2733;
+    --hairline: #221e2b;
+    --code-bg: #1f1c27;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.12);
+    --accent-border: rgba(192, 132, 252, 0.45);
+    --ok: #3dd68c;
+    --ok-glow: rgba(61, 214, 140, 0.16);
+    --err: #ff6369;
+    --err-glow: rgba(255, 99, 105, 0.16);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.5) 0 24px 48px -16px, rgba(0, 0, 0, 0.3) 0 4px 12px -4px;
+    --shadow-sm: rgba(0, 0, 0, 0.35) 0 2px 8px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(52rem 30rem at 50% -8rem, var(--accent-bg), transparent 70%),
+    var(--bg);
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: clamp(40px, 6vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 28px 0 0;
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+/* ---------- Chrome: header / nav / footer ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.site-nav {
+  width: min(1126px, 100%);
+  margin: 0 auto;
+  height: 60px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.2px;
+}
+
+.brand-mark {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.brand-name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  transform: translateY(1px);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-links a {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.nav-links a:hover {
+  color: var(--text-h);
+  background: var(--code-bg);
+}
+
+.nav-links a[data-status='active'],
+.nav-links a[aria-current='page'] {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.site-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(1126px, 100%);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-footer {
+  border-top: 1px solid var(--hairline);
+  padding: 20px 24px calc(20px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.site-footer p {
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  color: var(--text-dim);
+}
+
+/* ---------- Placeholder panels (Login / App) ---------- */
+
+.page {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 48px 0 96px;
+}
+
+.panel {
+  width: min(430px, 100%);
+  padding: 44px 36px 40px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.panel-kicker {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel h1 {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  margin: 18px 0 10px;
+}
+
+.panel p {
+  font-size: 15px;
+  line-height: 160%;
+  color: var(--text);
+}
