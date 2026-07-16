@@ -205,6 +205,25 @@ code {
   background: var(--accent-bg);
 }
 
+.nav-links .nav-cta {
+  margin-left: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav-links .nav-cta:hover {
+  background: var(--accent);
+  color: #fff;
+  filter: brightness(1.08);
+}
+
+@media (max-width: 720px) {
+  .nav-links .nav-anchor {
+    display: none;
+  }
+}
+
 .site-main {
   flex: 1;
   display: flex;

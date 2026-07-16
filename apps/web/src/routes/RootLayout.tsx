@@ -12,11 +12,19 @@ export function RootLayout() {
             <span className="brand-name">PYRA</span>
           </Link>
           <div className="nav-links">
-            <Link to="/" activeOptions={{ exact: true }}>
-              Home
-            </Link>
+            <a href="/#capabilities" className="nav-anchor">
+              Capabilities
+            </a>
+            <a href="/#how-it-works" className="nav-anchor">
+              How it works
+            </a>
+            <a href="/#faq" className="nav-anchor">
+              FAQ
+            </a>
             <Link to="/login">Login</Link>
-            <Link to="/app">App</Link>
+            <a href="/#demo" className="nav-cta">
+              Request a demo
+            </a>
           </div>
         </nav>
       </header>
@@ -24,7 +32,7 @@ export function RootLayout() {
         <Outlet />
       </main>
       <footer className="site-footer">
-        <p>PYRA · Bluesky Labs</p>
+        <p>PYRA · Bluesky Labs · AGPL-3.0</p>
       </footer>
     </>
   );
