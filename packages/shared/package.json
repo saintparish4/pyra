@@ -10,6 +10,6 @@
   "devDependencies": {
     "@pyra/config": "workspace:*",
     "eslint": "^9.28.0",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0.3"
   }
 }

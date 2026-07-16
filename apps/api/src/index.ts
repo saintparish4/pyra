@@ -25,7 +25,7 @@ await app.register(cors, {
   credentials: true,
 });
 
-app.get("/health", async () => ({ ok: true }));
+app.get("/health", () => ({ ok: true }));
 
 // better-auth handles its own routing under this prefix (sign-up, sign-in,
 // sign-out, session, ...); see src/auth/index.ts for enabled methods.
@@ -34,7 +34,7 @@ app.route({
   url: "/api/auth/*",
   async handler(request, reply) {
     try {
-      const url = new URL(request.url, `http://${request.headers.host}`);
+      const url = new URL(request.url, `http://${request.headers.host ?? "localhost"}`);
       const headers = fromNodeHeaders(request.headers);
       const hasBody = request.method !== "GET" && request.method !== "HEAD";
       const req = new Request(url, {
@@ -46,7 +46,9 @@ app.route({
       const response = await auth.handler(req);
 
       reply.status(response.status);
-      response.headers.forEach((value, key) => reply.header(key, value));
+      for (const [key, value] of response.headers) {
+        reply.header(key, value);
+      }
       reply.send(response.body ? await response.text() : null);
     } catch (error) {
       app.log.error({ err: error }, "auth handler error");
