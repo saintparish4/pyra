@@ -31,6 +31,9 @@ async function seed() {
       set: { name: DEPARTMENT.name },
     })
     .returning();
+  if (!department) {
+    throw new Error("department upsert returned no row");
+  }
 
   const existing = await db.query.users.findFirst({
     where: eq(users.email, ADMIN.email),
@@ -43,7 +46,7 @@ async function seed() {
   const userId = randomUUID();
   await db.insert(users).values({
     id: userId,
-    departmentId: department!.id,
+    departmentId: department.id,
     name: ADMIN.name,
     email: ADMIN.email,
     emailVerified: true,
@@ -62,7 +65,7 @@ async function seed() {
   });
 
   console.log(
-    `seeded department "${department!.slug}" and admin ${ADMIN.email}` +
+    `seeded department "${department.slug}" and admin ${ADMIN.email}` +
       (passwordFromEnv ? "" : ` (password: ${ADMIN.password})`),
   );
 }
