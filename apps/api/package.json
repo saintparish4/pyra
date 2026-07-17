@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "seed": "tsx src/scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
@@ -20,6 +21,7 @@
     "@trpc/server": "^11.18.0",
     "better-auth": "^1.6.23",
     "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "fastify": "^5.10.0",
     "pg-boss": "^12.26.0",
     "zod": "^4.4.3"

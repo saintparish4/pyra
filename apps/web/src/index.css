@@ -288,3 +288,65 @@ code {
   line-height: 160%;
   color: var(--text);
 }
+
+.auth-form {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+  text-align: left;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+.auth-form input {
+  padding: 10px 12px;
+  font: 15px/140% var(--sans);
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.auth-form input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.auth-form button,
+.auth-signout {
+  padding: 11px 16px;
+  font: 600 15px/1 var(--sans);
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.auth-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.auth-signout {
+  margin-top: 20px;
+  color: var(--text-h);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.auth-error {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--err-glow);
+  color: var(--err);
+  font-size: 14px;
+}
