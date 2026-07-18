@@ -206,6 +206,9 @@ importers:
       '@pyra/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^26.1.1
+        version: 26.1.1
       eslint:
         specifier: ^9.28.0
         version: 9.39.5
