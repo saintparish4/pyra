@@ -289,6 +289,28 @@ code {
   color: var(--text);
 }
 
+.panel-links {
+  margin-top: 24px;
+  display: grid;
+  gap: 8px;
+}
+
+.panel-links a {
+  display: block;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.panel-links a:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
 .auth-form {
   margin-top: 24px;
   display: grid;

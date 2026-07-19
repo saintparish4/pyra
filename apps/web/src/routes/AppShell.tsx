@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 
 import { authClient } from "../lib/auth";
 import { trpc } from "../lib/trpc";
@@ -41,6 +41,13 @@ export function AppShell() {
         ) : (
           <p>{me.error ? me.error.message : "Loading session…"}</p>
         )}
+        <nav className="panel-links">
+          <Link to="/deploy">Deploy</Link>
+          <Link to="/admin">Admin</Link>
+          <Link to="/import">Import</Link>
+          <Link to="/schema">Schema</Link>
+          <Link to="/adrs">ADRs</Link>
+        </nav>
         <button
           className="auth-signout"
           type="button"

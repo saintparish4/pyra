@@ -1,0 +1,17 @@
+# Normalize all text files to LF in the repository and working tree,
+# so Windows/WSL checkouts stop producing whole-file CRLF churn.
+* text=auto eol=lf
+
+# Windows scripts are the one place CRLF is required
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files — never normalize
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary

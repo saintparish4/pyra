@@ -1,7 +1,10 @@
 packages:
   - "packages/*"
   - "apps/*"
+  - "docs"
 allowBuilds:
+  '@swc/core': true
+  core-js: true
   esbuild: true
 minimumReleaseAgeExclude:
   - '@turbo/darwin-64@2.10.5'
