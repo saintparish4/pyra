@@ -14,3 +14,4 @@ minimumReleaseAgeExclude:
   - '@turbo/windows-64@2.10.5'
   - '@turbo/windows-arm64@2.10.5'
   - turbo@2.10.5
+  - antiscaler@1.1.1
