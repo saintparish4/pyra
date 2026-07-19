@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: pyra
       POSTGRES_DB: pyra
     ports:
-      - "127.0.0.1:5432:5432"
+      # Host-side port only; containers always use postgres:5432 in-network.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,8 +23,9 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
+      # Host-side ports only; containers always use minio:9000 in-network.
+      - "127.0.0.1:${MINIO_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - miniodata:/data
 
@@ -82,7 +84,8 @@ services:
       context: ..
       dockerfile: apps/web/Dockerfile
     ports:
-      - "8080:80"
+      # If you change WEB_PORT, update PYRA_ORIGIN to match.
+      - "${WEB_PORT:-8080}:80"
     depends_on:
       api:
         condition: service_healthy

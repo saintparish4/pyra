@@ -32,6 +32,11 @@ auth cookies and CSRF checks are validated against it.
 
 - Postgres (5432) and the MinIO console (9001) are bound to `127.0.0.1` on the
   host for debugging only; containers talk over the compose network.
+- Port conflict on the host? Override the host-side mapping in `.env`
+  (`POSTGRES_PORT`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`, `WEB_PORT`) — e.g.
+  `POSTGRES_PORT=5433` if you already run Postgres locally. Container-side
+  ports (`postgres:5432`, `minio:9000`, api `3001`) never change. If you
+  override `WEB_PORT`, update `PYRA_ORIGIN` to match.
 - The job queue (pg-boss) lives inside Postgres — no extra service needed.
 - TLS: put your usual reverse proxy (Caddy, Traefik, nginx) in front of port
   8080, and change `PYRA_ORIGIN` to the `https://` URL.
