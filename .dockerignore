@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/build
+**/.turbo
+**/.docusaurus
+.git
+.github
+.claude
+.env
+deploy/.env
+PYRA_PRD.md

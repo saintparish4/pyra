@@ -27,6 +27,67 @@ services:
     volumes:
       - miniodata:/data
 
+  # One-shot: apply drizzle migrations, then seed the first department/admin
+  # (idempotent — safe on every `up`). The api waits for this to finish.
+  migrate:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    image: pyra-api
+    working_dir: /app
+    command: sh -c "pnpm --filter @pyra/db migrate && pnpm --filter @pyra/api seed"
+    environment:
+      DATABASE_URL: postgresql://pyra:pyra@postgres:5432/pyra
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Admin}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@pyra.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required - copy deploy/.env.example to deploy/.env and fill it in}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    image: pyra-api
+    environment:
+      PORT: "3001"
+      DATABASE_URL: postgresql://pyra:pyra@postgres:5432/pyra
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: pyra
+      # The origin users open in the browser; auth cookies and CSRF checks
+      # are validated against it.
+      WEB_ORIGIN: ${PYRA_ORIGIN:-http://localhost:8080}
+      BETTER_AUTH_URL: ${PYRA_ORIGIN:-http://localhost:8080}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required - generate with 'openssl rand -base64 32' and set it in deploy/.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
   miniodata:
