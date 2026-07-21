@@ -1,6 +1,6 @@
-import heroImg from "../assets/hero.png";
+import { useState, type FormEvent } from "react";
+
 import pyraLogo from "../assets/pyra.svg";
-import pyra2Logo from "../assets/pyra2.svg";
 import { trpc } from "../lib/trpc";
 import "./Home.css";
 
@@ -28,13 +28,31 @@ function SectionHeader({
 
 /* ---------- 1. Hero ---------- */
 
+const DASH_ROWS = [
+  { id: "2026-0347", type: "Structure fire — 114 Maple St", status: "accepted", label: "Accepted" },
+  { id: "2026-0346", type: "Motor vehicle crash — Rt 9, MM 12", status: "submitted", label: "Submitted" },
+  { id: "2026-0345", type: "Alarm activation — Ridgeline Elementary", status: "validated", label: "Validated" },
+  { id: "2026-0344", type: "Brush fire — Carver Rd easement", status: "draft", label: "Draft" },
+  { id: "2026-0343", type: "Public assist — 41 Depot St", status: "rejected", label: "Rejected" },
+];
+
 function Hero() {
+  const health = trpc.health.check.useQuery();
+  const status = health.isPending ? "pending" : health.isError ? "error" : "ok";
+  const [email, setEmail] = useState("");
+
+  function handleDemoRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const body = encodeURIComponent(`Department contact: ${email}`);
+    window.location.href = `${CONTACT}?subject=PYRA%20demo%20request&body=${body}`;
+  }
+
   return (
     <section className="lp-hero" id="top">
       <div className="lp-hero-copy">
         <span className="kicker">Open-source fire department RMS</span>
         <h1>
-          Own your records <em>forever</em>.
+          Own your records <mark>forever</mark>.
         </h1>
         <p className="lp-hero-sub">
           PYRA is a <strong>free, open-source (AGPL-3.0), self-hostable</strong>{" "}
@@ -42,25 +60,68 @@ function Hero() {
           incident reporting, one-click export of everything, and a nonprofit
           co-op behind it — so it can never be acquired, sunset, or marked up.
         </p>
-        <div className="lp-hero-actions">
-          <a className="btn btn-primary" href="#demo">
+        <form className="demo-form" onSubmit={handleDemoRequest}>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="chief@yourdepartment.gov"
+            aria-label="Work email"
+            required
+          />
+          <button type="submit" className="btn btn-dark">
             Request a demo
-          </a>
-          <a className="btn btn-ghost" href="#how-it-works">
-            How it works
-          </a>
-        </div>
+          </button>
+        </form>
         <p className="lp-hero-note">
           Pay nothing and self-host, or pay server costs on the hosted co-op
           tier — never a private-equity markup.
         </p>
       </div>
-      <div className="lp-hero-art" aria-hidden="true">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={pyraLogo} className="mark-a" alt="" />
-          <img src={pyra2Logo} className="mark-b" alt="" />
+      <div className="hero-scene">
+        <div className="blob blob-red" aria-hidden="true" />
+        <div className="blob blob-gold" aria-hidden="true" />
+        <div className="blob blob-black" aria-hidden="true" />
+        <div className="blob blob-white" aria-hidden="true" />
+        <div className="hero-card">
+          <div className="hero-card-chrome">
+            <span className="hero-card-title">Cedar Hollow VFD — Incident board</span>
+            <span className={`status-pill is-${status}`}>
+              <span className="status-dot" aria-hidden="true" />
+              {health.isPending ? "connecting…" : health.isError ? "API offline" : "API live"}
+            </span>
+          </div>
+          <ul className="dash-rows">
+            {DASH_ROWS.map((r) => (
+              <li key={r.id}>
+                <span className="dash-id">{r.id}</span>
+                <span className="dash-type">{r.type}</span>
+                <span className={`chip chip-${r.status}`}>{r.label}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="hero-card-stats">
+            <div className="hero-stat">
+              <strong>97%</strong>
+              <span>accepted first try</span>
+            </div>
+            <div className="hero-stat">
+              <strong>4m 32s</strong>
+              <span>median report time</span>
+            </div>
+            <div className="hero-stat">
+              <strong>0</strong>
+              <span>records lost, ever</span>
+            </div>
+          </div>
         </div>
+        <p className="hero-caption ">
+          <strong>
+            Preview with sample data. Pilot targets: ≥95% first-attempt NERIS
+            acceptance, routine reports in under 5 minutes.
+          </strong>
+        </p>
+   
       </div>
     </section>
   );
@@ -131,73 +192,7 @@ function Problem() {
   );
 }
 
-/* ---------- 4. Live command dashboard ---------- */
-
-const DASH_ROWS = [
-  { id: "2026-0347", type: "Structure fire — 114 Maple St", status: "accepted", label: "Accepted" },
-  { id: "2026-0346", type: "Motor vehicle crash — Rt 9, MM 12", status: "submitted", label: "Submitted" },
-  { id: "2026-0345", type: "Alarm activation — Ridgeline Elementary", status: "validated", label: "Validated" },
-  { id: "2026-0344", type: "Brush fire — Carver Rd easement", status: "draft", label: "Draft" },
-  { id: "2026-0343", type: "Public assist — 41 Depot St", status: "rejected", label: "Rejected · invalid subtype" },
-];
-
-function Dashboard() {
-  const health = trpc.health.check.useQuery();
-  const status = health.isPending ? "pending" : health.isError ? "error" : "ok";
-
-  return (
-    <section className="lp-section" id="dashboard">
-      <SectionHeader
-        kicker="Live command dashboard"
-        title="Every incident, from draft to NERIS acceptance"
-        lead="Chiefs see submission status for every report — draft, validated, submitted, accepted, or rejected with the reason — without chasing anyone down."
-      />
-      <div className="dash" role="img" aria-label="Preview of the PYRA incident status dashboard">
-        <div className="dash-chrome">
-          <span className="dash-dot" />
-          <span className="dash-dot" />
-          <span className="dash-dot" />
-          <span className="dash-title">Cedar Hollow VFD — Incident board</span>
-          <span className={`status-pill dash-health is-${status}`}>
-            <span className="status-dot" aria-hidden="true" />
-            {health.isPending ? "connecting…" : health.isError ? "API offline" : "API live"}
-          </span>
-        </div>
-        <div className="dash-body">
-          <ul className="dash-rows">
-            {DASH_ROWS.map((r) => (
-              <li key={r.id}>
-                <span className="dash-id">{r.id}</span>
-                <span className="dash-type">{r.type}</span>
-                <span className={`chip chip-${r.status}`}>{r.label}</span>
-              </li>
-            ))}
-          </ul>
-          <aside className="dash-side">
-            <div className="dash-stat">
-              <strong>97%</strong>
-              <span>accepted on first submission</span>
-            </div>
-            <div className="dash-stat">
-              <strong>4m 32s</strong>
-              <span>median routine report time</span>
-            </div>
-            <div className="dash-stat">
-              <strong>0</strong>
-              <span>records lost, ever — audited &amp; backed up</span>
-            </div>
-          </aside>
-        </div>
-      </div>
-      <p className="fineprint">
-        Preview with sample data. Targets from the PYRA pilot program: ≥95%
-        first-attempt NERIS acceptance, routine reports in under 5 minutes.
-      </p>
-    </section>
-  );
-}
-
-/* ---------- 5. Core capabilities ---------- */
+/* ---------- 4. Core capabilities ---------- */
 
 const CAPABILITIES = [
   {
@@ -236,6 +231,7 @@ function Capabilities() {
       <div className="card-grid cols-3">
         {CAPABILITIES.map((c) => (
           <article key={c.title} className="card">
+            <img src={pyraLogo} className="card-mark" alt="" />
             <h3>{c.title}</h3>
             <p>{c.body}</p>
           </article>
@@ -245,7 +241,7 @@ function Capabilities() {
   );
 }
 
-/* ---------- 6. How it works ---------- */
+/* ---------- 5. How it works ---------- */
 
 const STEPS = [
   {
@@ -288,7 +284,7 @@ function HowItWorks() {
   );
 }
 
-/* ---------- 7. Role-based workflows ---------- */
+/* ---------- 6. Role-based workflows ---------- */
 
 const PERSONAS = [
   {
@@ -353,7 +349,7 @@ function Personas() {
   );
 }
 
-/* ---------- 8. Mobile experience ---------- */
+/* ---------- 7. Mobile experience ---------- */
 
 function Mobile() {
   return (
@@ -410,7 +406,7 @@ function Mobile() {
   );
 }
 
-/* ---------- 9. Pre-incident intelligence ---------- */
+/* ---------- 8. Pre-incident intelligence ---------- */
 
 const ROADMAP = [
   { name: "NERIS incident reporting", phase: "MVP", note: "Create, validate, submit, track" },
@@ -444,7 +440,7 @@ function PreIncident() {
   );
 }
 
-/* ---------- 10. Integrations and reliability ---------- */
+/* ---------- 9. Integrations and reliability ---------- */
 
 function Reliability() {
   return (
@@ -478,7 +474,7 @@ function Reliability() {
   );
 }
 
-/* ---------- 11. Analytics ---------- */
+/* ---------- 10. Analytics ---------- */
 
 const CHART = [
   { month: "Jan", v: 34 },
@@ -519,7 +515,7 @@ function Analytics() {
         <p className="chart-title">Incidents by month</p>
         <div className="chart">
           {CHART.map((c) => (
-            <div key={c.month} className="chart-col">
+            <div key={c.month} className={`chart-col${c.v === max ? " is-max" : ""}`}>
               <div className="chart-bar" style={{ height: `${(c.v / max) * 100}%` }} />
               <span>{c.month}</span>
             </div>
@@ -530,7 +526,7 @@ function Analytics() {
   );
 }
 
-/* ---------- 12. Case study ---------- */
+/* ---------- 11. Case study ---------- */
 
 function CaseStudy() {
   return (
@@ -571,7 +567,7 @@ function CaseStudy() {
   );
 }
 
-/* ---------- 13. FAQ ---------- */
+/* ---------- 12. FAQ ---------- */
 
 const FAQS = [
   {
@@ -616,7 +612,7 @@ function Faq() {
   );
 }
 
-/* ---------- 14. Demo CTA ---------- */
+/* ---------- 13. Demo CTA ---------- */
 
 function DemoCta() {
   return (
@@ -629,11 +625,11 @@ function DemoCta() {
           NERIS submission, and a restore drill included. Bring an export;
           leave owning your records.
         </p>
-        <div className="lp-hero-actions">
+        <div className="cta-actions">
           <a className="btn btn-primary" href={`${CONTACT}?subject=PYRA%20demo%20request`}>
             Request a demo
           </a>
-          <a className="btn btn-ghost" href={`${CONTACT}?subject=PYRA%20pilot%20program`}>
+          <a className="btn btn-ghost-light" href={`${CONTACT}?subject=PYRA%20pilot%20program`}>
             Join the pilot program
           </a>
         </div>
@@ -642,15 +638,15 @@ function DemoCta() {
   );
 }
 
-/* ---------- 15. Footer ---------- */
+/* ---------- 14. Footer ---------- */
 
 function LandingFooter() {
   return (
     <footer className="lp-footer">
       <div className="lp-footer-brand">
-        <img src={pyraLogo} alt="" width="22" height="22" />
+        <img src={pyraLogo} alt="" width="24" height="24" />
         <div>
-          <p className="lp-footer-name">PYRA</p>
+          <p className="lp-footer-name">pyra</p>
           <p className="lp-footer-tag">
             Open-source records management for US fire departments. Own your
             records forever.
@@ -690,7 +686,6 @@ export function Home() {
       <Hero />
       <Trust />
       <Problem />
-      <Dashboard />
       <Capabilities />
       <HowItWorks />
       <Personas />

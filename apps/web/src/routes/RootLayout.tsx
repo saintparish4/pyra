@@ -9,7 +9,7 @@ export function RootLayout() {
         <nav className="site-nav">
           <Link to="/" className="brand">
             <img src={pyraLogo} className="brand-mark" alt="" />
-            <span className="brand-name">PYRA</span>
+            <span className="brand-name">pyra</span>
           </Link>
           <div className="nav-links">
             <a href="/#capabilities" className="nav-anchor">
@@ -21,9 +21,13 @@ export function RootLayout() {
             <a href="/#faq" className="nav-anchor">
               FAQ
             </a>
-            <Link to="/login">Login</Link>
-            <a href="/#demo" className="nav-cta">
-              Request a demo
+          </div>
+          <div className="nav-actions">
+            <Link to="/login" className="btn btn-dark btn-nav">
+              Log in
+            </Link>
+            <a href="/#demo" className="btn btn-primary btn-nav">
+              Get started
             </a>
           </div>
         </nav>
