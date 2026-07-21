@@ -181,7 +181,9 @@ code {
 /* ---------- Chrome: header / nav / footer ---------- */
 
 .site-header {
-  padding: 16px 24px 0;
+  padding-top: 16px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
 }
 
 .site-nav {
@@ -254,8 +256,50 @@ code {
 }
 
 @media (max-width: 760px) {
-  .nav-links .nav-anchor {
+  .nav-links {
     display: none;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header {
+    padding: 12px 16px 0;
+  }
+
+  .site-nav {
+    min-height: 56px;
+    padding: 6px 8px 6px 16px;
+    gap: 8px;
+  }
+
+  .brand-name {
+    font-size: 20px;
+  }
+
+  .btn-nav {
+    padding: 9px 15px;
+    font-size: 14px;
+  }
+}
+
+/* brand + both CTAs still have to fit a 320px viewport */
+@media (max-width: 380px) {
+  .site-nav {
+    padding-left: 12px;
+    gap: 6px;
+  }
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .btn-nav {
+    padding: 8px 12px;
+    font-size: 13px;
   }
 }
 
@@ -265,7 +309,15 @@ code {
   flex-direction: column;
   width: min(1248px, 100%);
   margin: 0 auto;
-  padding: 0 24px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
+}
+
+@media (max-width: 560px) {
+  .site-main {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }
 
 .site-footer {
