@@ -1,6 +1,13 @@
 # Pyra
 
-**Status:** early planning — not a shippable product yet.
+**Status:** early planning — not a shippable product yet. **Currently blocked on NERIS** (see below).
+
+> **⏸ Waiting on NERIS for the official data dictionary.**
+> Pyra's incident model is built directly against the NERIS data dictionary, so we are holding at Phase 0 until we have the official dictionary and sandbox access from UL/FSRI. Everything downstream — `packages/neris` types and validators, the incident form, submission, and the importer's target schema — depends on it, and building against a guess would mean rewriting all of it.
+>
+> **What's moving in the meantime:** repo scaffolding, auth and tenancy, the app shell and landing site, deploy tooling, and docs — the parts that don't encode the schema. **What's paused:** anything that models NERIS entities or fields.
+>
+> If you work with NERIS integration at UL/FSRI, or you're a department willing to be a pilot, we'd like to hear from you — [open an issue](https://github.com/saintparish4/pyra/issues).
 
 We're building a free, open-source (AGPL-3.0), self-hostable records management system for US fire departments — with a planned low-cost hosted co-op tier for departments that don't want to run infrastructure, governed by a nonprofit/cooperative so it cannot be acquired.
 
@@ -57,9 +64,9 @@ Explicit, to protect scope:
 
 ### Phase 0 — Discovery & foundations
 
-- Enroll with NERIS/UL as integration vendor; obtain sandbox + data dictionary ← **critical path, do first**
+- Enroll with NERIS/UL as integration vendor; obtain sandbox + data dictionary ← **critical path, currently blocking everything below it**
 - 8–10 chief interviews (Maine/NM departments quoted in press = warm leads); capture report-writing workflow on video if permitted
-- Model the NERIS data dictionary into `packages/neris` types + zod validators
+- Model the NERIS data dictionary into `packages/neris` types + zod validators — **paused pending the dictionary**
 - Repo scaffolding; auth + tenancy walking skeleton
 - Form entity decision (or park under fiscal sponsor) before any money moves
 - **Exit criteria:** sandbox credentials in hand; schema for incident core drafted; 3 pilot-interest commitments
