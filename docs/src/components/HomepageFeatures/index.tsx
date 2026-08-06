@@ -1,68 +1,95 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
+import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
-type FeatureItem = {
+type Section = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  to: string;
   description: ReactNode;
 };
 
-const FeatureList: FeatureItem[] = [
+const SECTIONS: Section[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Introduction',
+    to: '/docs/intro',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        What Pyra is, what runs today, and what is still blocked on the NERIS
+        data dictionary.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Deploy',
+    to: '/docs/deploy',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Self-host the whole thing with Docker Compose — Postgres, MinIO, the
+        API, and the web app behind one origin.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Admin',
+    to: '/docs/admin',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Departments, members, and roles. Accounts are provisioned, never
+        self-serve, so tenancy holds.
+      </>
+    ),
+  },
+  {
+    title: 'Import',
+    to: '/docs/import',
+    description: (
+      <>
+        Bring twenty years of history in from NFIRS flat files and vendor
+        exports. The reason leaving a vendor is possible.
+      </>
+    ),
+  },
+  {
+    title: 'Schema',
+    to: '/docs/schema',
+    description: (
+      <>
+        Pyra&apos;s own tables, the shared validators, and how the NERIS
+        dictionary will map onto them.
+      </>
+    ),
+  },
+  {
+    title: 'ADRs',
+    to: '/docs/adr',
+    description: (
+      <>
+        The architecture decisions behind the stack, the risks accepted
+        knowingly, and what would reverse them.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function SectionCard({title, to, description}: Section) {
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
-    </div>
+    <Link to={to} className={styles.card}>
+      <Heading as="h2" className={styles.cardTitle}>
+        {title}
+      </Heading>
+      <p className={styles.cardBody}>{description}</p>
+    </Link>
   );
 }
 
-export default function HomepageFeatures(): ReactNode {
+export default function HomepageSections(): ReactNode {
   return (
-    <section className={styles.features}>
+    <section className={styles.sections}>
       <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+        <div className={styles.grid}>
+          {SECTIONS.map((section) => (
+            <SectionCard key={section.to} {...section} />
           ))}
         </div>
       </div>

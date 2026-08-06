@@ -16,8 +16,16 @@
   }
 }
 
+.heroNote {
+  max-width: 42rem;
+  margin: 0 auto 2rem;
+  opacity: 0.9;
+}
+
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }

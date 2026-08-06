@@ -1,0 +1,60 @@
+---
+sidebar_position: 6
+title: Architecture decisions
+sidebar_label: ADRs
+description: The decisions behind Pyra's stack, and the conditions that would reverse them.
+---
+
+Architecture Decision Records capture choices that are expensive to reverse, along with the
+context that made them right at the time. The point is not the decision — it is that a
+contributor arriving in two years can tell whether the reasoning still holds.
+
+## Index
+
+| ADR | Title | Status | Date |
+| --- | --- | --- | --- |
+| [0001](https://github.com/saintparish4/pyra/blob/master/adr/0001-stack-choice.md) | Stack choice | Accepted | 2026-07-18 |
+
+ADRs live in [`adr/`](https://github.com/saintparish4/pyra/tree/master/adr) in the repo, as
+plain markdown, one file per decision.
+
+## ADR-0001 in one paragraph
+
+TypeScript end-to-end in a pnpm + Turborepo monorepo: React + Vite for an offline-capable PWA,
+Fastify + tRPC for the API, Postgres 16 + Drizzle, pg-boss for jobs, MinIO for object storage,
+better-auth for sessions. Three constraints drove almost all of it — solo-founder velocity,
+contributor accessibility, and a self-host footprint a volunteer can run. That last one is why
+the queue lives inside Postgres instead of Redis, and why there is no SSR framework.
+
+Read the [full record](https://github.com/saintparish4/pyra/blob/master/adr/0001-stack-choice.md)
+for the alternatives considered and the accepted risks.
+
+## Format
+
+Each record carries: **Context** (the constraints in force), **Decision** (what was chosen, per
+component, with the alternative it beat), **Consequences** (positive, and the negatives
+accepted knowingly), and **Revisit triggers** — the specific conditions that would reopen the
+decision.
+
+Revisit triggers are the part that earns the format. "Reconsider Next.js if a public,
+SEO-relevant surface becomes a goal" is a decision that can be checked against reality later;
+"we chose Vite" is not.
+
+## When to write one
+
+When a choice is costly to undo, constrains later choices, or will otherwise be re-litigated
+by someone who wasn't there. Library picks generally don't qualify. Anything that shapes the
+deployment footprint, the data model, or the tenancy boundary does.
+
+Number sequentially, never renumber, and never delete: a superseded ADR gets its status
+changed and a pointer to the record that replaced it. The history is the value.
+
+## Not written yet
+
+Decisions taken but not recorded — each needs an ADR before Phase 1 closes:
+
+- Tenancy enforcement: Postgres RLS versus application-level scoping.
+- NERIS type generation: generated-and-committed versus generated at build time.
+- Offline sync conflict resolution for the PWA draft queue.
+- Governance and entity structure — nonprofit or cooperative, and the mechanism that makes
+  "cannot be acquired" more than an intention.

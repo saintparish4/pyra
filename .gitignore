@@ -6,3 +6,7 @@ coverage
 PYRA_PRD.md
 .claude
 DESIGN.md
+AGENTS.md
+# Leading slash anchors this to the repo root. Unanchored, it also matches
+# packages/neris/ (core.ignorecase is on), which must stay tracked.
+/NERIS/

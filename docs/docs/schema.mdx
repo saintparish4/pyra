@@ -1,0 +1,77 @@
+---
+sidebar_position: 5
+title: Schema
+sidebar_label: Schema
+description: Pyra's own tables, and how the NERIS data dictionary maps onto them.
+---
+
+Pyra's data model has two layers: our own tables, which exist and are migrating; and the NERIS
+incident model, which is published upstream as reference material but not yet implemented.
+
+:::info Stub
+
+The auth and tenancy tables are real. The incident model is not — see below.
+
+:::
+
+## Layer 1 — Pyra's tables
+
+Drizzle ORM over Postgres 16, in `packages/db`. SQL-first on purpose: migrations and
+row-level-security policies stay readable as SQL, and a contributor can review them without
+learning an ORM's dialect.
+
+| Table | Purpose |
+| --- | --- |
+| `departments` | The tenant. `id` (uuid), `name`, `slug` |
+| `users` | Members. Belongs to exactly one department; carries `role` |
+| `sessions`, `accounts`, `verifications` | better-auth's tables, in our own database |
+
+Auth tables live in our Postgres rather than a vendor's, which makes migrating off better-auth
+a data-preserving refactor instead of a data migration.
+
+Two Postgres features are load-bearing and drove the choice of database:
+
+- **Row-level security** for department isolation on a shared instance.
+- **JSONB** for imported records that don't map 1:1 onto NERIS — preserved verbatim, still
+  searchable — and for absorbing NERIS schema versions without a migration per revision.
+
+## Layer 2 — shared DTOs
+
+`packages/shared` holds the zod schemas both the API and the web app validate against: auth
+DTOs, the API error envelope, and branded ID types. `DepartmentId` is branded so a bare string
+cannot be passed where a tenant scope is expected — the compiler forces every value through a
+parse at the boundary, which is a cheap structural defence against cross-tenant bugs.
+
+## Layer 3 — NERIS
+
+`packages/neris` is **deliberately empty**.
+
+The published framework lives upstream at
+[`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework). Contributors clone it to
+`NERIS/` at the repo root, which is gitignored — it is upstream's to version, and a copy in
+our tree would go stale without anyone noticing:
+
+| Path | Contents |
+| --- | --- |
+| `CORE/modules/yml/` | Field metadata for dispatch, entity, and incident modules |
+| `CORE/value_sets/yml/` | 96 value sets as `CAPITAL_CASE` enums |
+| `SECONDARY/` | Community Risk Reduction, Incident Analysis, Health & Safety — still moving upstream |
+| `MAPPINGS/` | NENA CLDXF location mapping; dispatch-code → incident-type template |
+| `openapi.json` | OpenAPI 3.1.0, NERIS v1.4.78, against the test API |
+
+What UL enrollment unlocks is production API access, confirmation that the published spec
+matches what we actually submit against, and a department's NERIS entity ID. Upstream is
+explicit that the API — not these files — is the source of truth.
+
+When it unblocks, the types get **generated** from those files, not transcribed. Roughly a
+hundred value sets and a dozen modules, all machine-readable, all still changing upstream:
+hand-writing them would be wrong within a month, and every consumer would inherit the
+mistake.
+
+## Not written yet
+
+- The incident model itself, and the validators that enforce NERIS's conditional requirements
+  (`possible_if`, `neris_core`, cardinality).
+- Which NERIS concepts get first-class tables versus JSONB.
+- How NERIS schema versions are tracked as the dictionary revises.
+- The full-export format — the "own your data" guarantee needs a documented, open shape.

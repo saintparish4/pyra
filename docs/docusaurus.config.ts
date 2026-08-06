@@ -40,18 +40,10 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/saintparish4/pyra/tree/master/docs/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          editUrl: 'https://github.com/saintparish4/pyra/tree/master/docs/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        // No blog. There is nothing to announce until Phase 1 ships, and an
+        // empty feed reads worse than no feed. Restore the blog options plus
+        // the navbar/footer entries when release notes start.
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -63,6 +55,16 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
+    // The docs are structure-first while the project is blocked upstream; say
+    // so before a visitor reads a stub as a promise. Remove at Phase 1.
+    announcementBar: {
+      id: 'pre-alpha-2026-08',
+      content:
+        'Pyra is in early planning and blocked on the official NERIS data dictionary. Most pages here are stubs — structure now, content as each phase lands.',
+      backgroundColor: '#ffe228',
+      textColor: '#130e30',
+      isCloseable: true,
+    },
     navbar: {
       title: 'Pyra',
       logo: {
@@ -72,11 +74,15 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          to: '/docs/adr',
+          label: 'ADRs',
+          position: 'left',
+        },
         {
           href: 'https://github.com/saintparish4/pyra',
           label: 'GitHub',
@@ -88,11 +94,36 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Run it',
           items: [
             {
-              label: 'Getting started',
+              label: 'Introduction',
               to: '/docs/intro',
+            },
+            {
+              label: 'Deploy',
+              to: '/docs/deploy',
+            },
+            {
+              label: 'Admin',
+              to: '/docs/admin',
+            },
+          ],
+        },
+        {
+          title: 'Reference',
+          items: [
+            {
+              label: 'Import',
+              to: '/docs/import',
+            },
+            {
+              label: 'Schema',
+              to: '/docs/schema',
+            },
+            {
+              label: 'ADRs',
+              to: '/docs/adr',
             },
           ],
         },
@@ -104,17 +135,12 @@ const config: Config = {
               href: 'https://github.com/saintparish4/pyra',
             },
             {
-              label: 'ADRs',
-              href: 'https://github.com/saintparish4/pyra/tree/master/adr',
+              label: 'Issues',
+              href: 'https://github.com/saintparish4/pyra/issues',
             },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
             {
-              label: 'Blog',
-              to: '/blog',
+              label: 'License (AGPL-3.0)',
+              href: 'https://github.com/saintparish4/pyra/blob/master/LICENSE',
             },
           ],
         },

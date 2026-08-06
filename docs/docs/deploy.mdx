@@ -1,0 +1,84 @@
+---
+sidebar_position: 2
+title: Deploy
+sidebar_label: Deploy
+description: Self-hosting Pyra with the Docker Compose stack.
+---
+
+The target is a department deploying Pyra in under an hour on one small server, with no prior
+container experience. The compose stack is the whole product for self-hosters — every extra
+service in it is a support burden, so there are only four.
+
+:::info Stub
+
+The stack runs, but this page is a summary. [`deploy/README.md`](https://github.com/saintparish4/pyra/blob/master/deploy/README.md)
+in the repo is canonical while things move; it gets absorbed here once the surface stops
+changing.
+
+:::
+
+## What you get
+
+| Service | Role |
+| --- | --- |
+| `postgres` | Postgres 16 — application data, and the pg-boss job queue (no Redis) |
+| `minio` | S3-compatible object storage for attachments |
+| `api` | Fastify + tRPC, health-checked on `/health` |
+| `web` | Nginx serving the built SPA, proxying `/api/*` and `/trpc/*` to the API |
+
+A one-shot `migrate` container applies migrations and seeds the first department and admin
+before `api` starts. It is idempotent, so it is safe on every `up`.
+
+Because Nginx proxies the API onto the same origin as the static site, the browser never makes
+a cross-origin request and there is no CORS to configure.
+
+## Quick start
+
+```bash
+cd deploy
+cp .env.example .env
+# edit .env: BETTER_AUTH_SECRET, SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD
+docker compose up --build
+```
+
+Then open `http://localhost:8080` and sign in as the seeded admin.
+
+Generate the auth secret rather than inventing one:
+
+```bash
+openssl rand -base64 32
+```
+
+:::warning Set `PYRA_ORIGIN` if members don't use localhost
+
+Auth cookies and CSRF checks validate against `PYRA_ORIGIN`. If people reach the server by IP
+or hostname, set it to match — `http://192.168.1.50:8080`, or your `https://` URL once TLS is
+in front. Sign-in fails in confusing ways if this is wrong.
+
+:::
+
+## Host port conflicts
+
+Container-side ports never change. Override only the host mapping in `.env` — `WEB_PORT`,
+`POSTGRES_PORT`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`. If you change `WEB_PORT`, change
+`PYRA_ORIGIN` to match.
+
+Postgres and the MinIO console are bound to `127.0.0.1` for debugging only; they are not
+reachable from the network.
+
+## TLS
+
+There is no certificate handling in the stack. Put your usual reverse proxy (Caddy, Traefik,
+nginx) in front of port 8080 and set `PYRA_ORIGIN` to the `https://` URL. Bundling a
+certificate manager would add a service and a failure mode to every deployment to serve the
+subset of operators who don't already have one.
+
+## Not written yet
+
+- **Backups and restore.** The commitment is a rehearsed restore drill, not just a `pg_dump`
+  command — including MinIO objects. Phase 4.
+- **Upgrades.** Version pinning and the migration path between releases.
+- **Monitoring.** What to alert on, and how to tell a wedged queue from an idle one.
+- **Sizing.** Actual CPU/RAM/disk figures, once there is a real department's data to measure.
+- **Verification.** A non-contributor deploying from these docs alone is the Phase 4 exit
+  criterion; until someone has, treat the hour estimate as a target and not a measurement.

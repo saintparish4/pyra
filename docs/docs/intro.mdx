@@ -1,47 +1,57 @@
 ---
 sidebar_position: 1
+title: Introduction
+sidebar_label: Introduction
+description: What Pyra is, what runs today, and what these docs will cover.
 ---
 
-# Tutorial Intro
+Pyra is a free, open-source (AGPL-3.0), self-hostable records management system for US fire
+departments, built around the January 2026 NFIRS→NERIS transition. Three private-equity-backed
+vendors control this market; departments stay because twenty years of incident history is held
+hostage in proprietary systems. Pyra exists so a department can own its records outright and
+still meet its federal reporting obligation.
 
-Let's discover **Docusaurus in less than 5 minutes**.
+:::warning Early planning — not shippable
 
-## Getting Started
+Pyra is at Phase 0. The incident model is built directly against the NERIS data dictionary, so
+everything that encodes the schema is **paused pending official dictionary and sandbox access
+from UL/FSRI**. Building against a guess would mean rewriting all of it.
 
-Get started by **creating a new site**.
+Moving now: repo scaffolding, auth and tenancy, the app shell, deploy tooling, and these docs.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+:::
 
-### What you'll need
+## What works today
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+| Area | State |
+| --- | --- |
+| Docker Compose stack (Postgres, MinIO, API, web) | Runs — see [Deploy](./deploy.mdx) |
+| Email + password auth, sessions, department scoping | Runs, provisioned by seed script — see [Admin](./admin.mdx) |
+| Incident reporting | Not started — blocked on the NERIS dictionary |
+| Legacy import | Interface only — see [Import](./import.mdx) |
+| NERIS submission | Not started |
 
-## Generate a new site
+## What these docs cover
 
-Generate a new Docusaurus site using the **classic template**.
+- **[Deploy](./deploy.mdx)** — standing up Pyra on your own server.
+- **[Admin](./admin.mdx)** — departments, members, and roles once it's running.
+- **[Import](./import.mdx)** — bringing historical records in from NFIRS and vendor exports.
+- **[Schema](./schema.mdx)** — Pyra's own tables, and how the NERIS dictionary maps onto them.
+- **[ADRs](./adr.mdx)** — the architecture decisions behind the stack, and why.
 
-The classic template will automatically be added to your project after you run the command:
+Most of these are stubs. They exist so the shape of the documentation is fixed before the
+content lands, and so each phase has somewhere to write into rather than a blank page.
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+## Who this is for
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+| Persona | Start here |
+| --- | --- |
+| The member who "does computers" | [Deploy](./deploy.mdx), then [Admin](./admin.mdx) |
+| Chief / assistant chief | This page, then the [roadmap](https://github.com/saintparish4/pyra#roadmap) |
+| Contributor | [ADRs](./adr.mdx), then [Schema](./schema.mdx) |
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+## Getting involved
 
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+If you work with NERIS integration at UL/FSRI, or you're a department willing to be a pilot,
+[open an issue](https://github.com/saintparish4/pyra/issues) — sandbox access is the single
+thing gating the rest of the roadmap.

@@ -1,11 +1,11 @@
 # Pyra
 
-**Status:** early planning — not a shippable product yet. **Currently blocked on NERIS** (see below).
+**Status:** scaffolding complete — it runs, but it does not do the job yet. **Blocked on NERIS** for everything that models incidents (see below).
 
 > **⏸ Waiting on NERIS for the official data dictionary.**
 > Pyra's incident model is built directly against the NERIS data dictionary, so we are holding at Phase 0 until we have the official dictionary and sandbox access from UL/FSRI. Everything downstream — `packages/neris` types and validators, the incident form, submission, and the importer's target schema — depends on it, and building against a guess would mean rewriting all of it.
 >
-> **What's moving in the meantime:** repo scaffolding, auth and tenancy, the app shell and landing site, deploy tooling, and docs — the parts that don't encode the schema. **What's paused:** anything that models NERIS entities or fields.
+> **Landed so far:** the monorepo, auth and department tenancy, the app shell and landing site, the Docker Compose stack, CI, and the docs site — the parts that don't encode the schema. **Still paused:** anything that models NERIS entities or fields.
 >
 > If you work with NERIS integration at UL/FSRI, or you're a department willing to be a pilot, we'd like to hear from you — [open an issue](https://github.com/saintparish4/pyra/issues).
 
@@ -60,6 +60,24 @@ Explicit, to protect scope:
 | **Quartermaster** (fast-follow) | Apparatus & SCBA checks | Daily/weekly checklists |
 | **Department Admin** | The one member who "does computers" | Deploy, back up, manage users, run imports |
 
+## What's built
+
+The foundations are done. The product is not — there is no way to write an incident report
+yet, because the thing an incident report has to conform to is the thing we're waiting on.
+
+| Area | State |
+|---|---|
+| Monorepo, CI | pnpm + Turborepo; GitHub Actions runs lint, typecheck, and test on every push and PR |
+| Auth, sessions, department tenancy | better-auth over Drizzle; accounts are provisioned, never self-serve |
+| Self-host stack | Docker Compose — Postgres, MinIO, API, and Nginx on one origin |
+| Web app | Shell, landing page, login, and stub routes; PWA app-shell precaching |
+| Shared validators | zod DTOs and branded tenant IDs in `packages/shared` |
+| Docs site | Docusaurus; Deploy / Admin / Import / Schema / ADR pages are stubs |
+| Architecture decisions | [ADR-0001](./adr/0001-stack-choice.md) — stack choice |
+| NERIS types, incident reporting, submission | **Not started** — blocked on the dictionary |
+| Legacy importer | **Interface only** — blocked on the target schema |
+| Row-level security, audit log | **Not started** — Phase 1 |
+
 ## Roadmap
 
 ### Phase 0 — Discovery & foundations
@@ -67,7 +85,7 @@ Explicit, to protect scope:
 - Enroll with NERIS/UL as integration vendor; obtain sandbox + data dictionary ← **critical path, currently blocking everything below it**
 - 8–10 chief interviews (Maine/NM departments quoted in press = warm leads); capture report-writing workflow on video if permitted
 - Model the NERIS data dictionary into `packages/neris` types + zod validators — **paused pending the dictionary**
-- Repo scaffolding; auth + tenancy walking skeleton
+- Repo scaffolding; auth + tenancy walking skeleton — **done**
 - Form entity decision (or park under fiscal sponsor) before any money moves
 - **Exit criteria:** sandbox credentials in hand; schema for incident core drafted; 3 pilot-interest commitments
 
@@ -107,6 +125,58 @@ Explicit, to protect scope:
 - Stand up hosted instance for departments that opt out of self-hosting
 - Finish FSRI badge; publish case study #1 ("Department X left ESO, saved $Y, kept 20 years of records")
 - **Exit criteria:** 90 consecutive days of production reporting at ≥3 departments; badge secured
+
+## Repository layout
+
+| Path | What |
+|---|---|
+| `apps/api` | Fastify + tRPC + better-auth |
+| `apps/web` | React + Vite PWA — shell, landing page, login, stub routes |
+| `packages/db` | Drizzle schema + Postgres client |
+| `packages/shared` | zod DTOs shared between web and API |
+| `packages/neris` | NERIS types — empty until the dictionary lands |
+| `packages/import` | Legacy-import parsers — `Parser` interface only |
+| `packages/config` | eslint / tsconfig / prettier presets |
+| `deploy` | Docker Compose self-host stack |
+| `docs` | Docusaurus documentation site |
+| `adr` | Architecture decision records |
+
+## Running it locally
+
+Node 22 and pnpm 11 (the exact version is pinned by `packageManager`). You also need a
+Postgres 16 and an S3-compatible object store — `deploy/` brings up both if you don't have
+them already.
+
+```bash
+pnpm install
+cp .env.example .env    # set DATABASE_URL and BETTER_AUTH_SECRET at minimum
+pnpm --filter @pyra/db migrate
+pnpm --filter @pyra/api seed
+pnpm dev
+```
+
+`pnpm dev` starts the API on `:3001` and the web app on `:5173`. The seed script creates a
+department and its first admin — in development it defaults to `admin@pyra.local`, and it
+refuses to run in production without an explicit `SEED_ADMIN_PASSWORD`.
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test   # what CI runs
+pnpm --filter @pyra/docs start             # docs site on :3000
+```
+
+To **self-host** rather than develop, use the Docker Compose stack instead —
+see [`deploy/README.md`](./deploy/README.md).
+
+## Documentation
+
+The docs site lives in `docs/` and covers Deploy, Admin, Import, Schema, and the ADR index.
+Most pages are stubs that state plainly what is not written yet; they exist so each phase has
+somewhere to write into.
+
+Contributors working on `packages/neris` should clone
+[`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework) to `NERIS/` at the repo
+root. That path is gitignored — the framework is upstream's to version, and a copy in this
+tree would go stale unnoticed.
 
 ## License
 

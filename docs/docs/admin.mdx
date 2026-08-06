@@ -1,0 +1,74 @@
+---
+sidebar_position: 3
+title: Admin
+sidebar_label: Admin
+description: Departments, members, and roles once Pyra is running.
+---
+
+Day-to-day administration: who is in the department, what they can do, and how tenancy keeps
+neighbouring departments apart on a shared instance.
+
+:::info Stub
+
+There is no admin UI yet. Everything below is done from the command line or the database.
+Members are provisioned by the seed script; the invite flow is Phase 1.
+
+:::
+
+## The model
+
+A **department** is the tenant. Every user belongs to exactly one, by a required
+`departmentId` foreign key — there is no such thing as a user without a department, and no
+cross-department user. Mutual-aid neighbours sharing a hosted instance must never see each
+other's data, so tenancy is a column on the user, not a setting.
+
+Two roles today:
+
+| Role | Intent |
+| --- | --- |
+| `admin` | Manages members, runs imports, handles deploys and backups |
+| `member` | Writes and submits reports |
+
+The role vocabulary will grow (training officer, quartermaster) as those modules land. It is a
+plain text column, deliberately, until the real set is known.
+
+## Provisioning the first admin
+
+The seed script creates the department and its first admin, and runs automatically in the
+compose stack's `migrate` step. Credentials come from `SEED_ADMIN_EMAIL` and
+`SEED_ADMIN_PASSWORD`.
+
+Run it directly during development:
+
+```bash
+pnpm --filter @pyra/api seed
+```
+
+It is idempotent — if the admin email already exists, it does nothing.
+
+:::warning Public sign-up is off, on purpose
+
+Anyone signing up from a public form has no department to belong to, and guessing one would
+break tenant isolation. Accounts are provisioned, never self-serve. The seed script refuses to
+run in production without an explicit `SEED_ADMIN_PASSWORD`.
+
+:::
+
+## Adding more members
+
+No supported path yet. Until the invite flow ships, additional members mean inserting a user
+row and a matching credential account row — see the seed script for the shape it expects.
+Treat that as a development workaround, not a documented procedure.
+
+## Not written yet
+
+- **Invite flow.** Admin invites by email, invitee sets their own password. Phase 1.
+- **Row-level security.** Tenant isolation is enforced by application queries today. The
+  Postgres RLS policies that make it structural — plus the tests that prove a department
+  cannot read another's rows — land with Phase 1.
+- **Two-factor auth.** TOTP is planned via better-auth's `twoFactor` plugin. Magic links are
+  on the list for members who find passwords hard.
+- **Audit log.** Who changed what, when. Required before a department can rely on Pyra for
+  compliance sign-off.
+- **Deactivating a member.** Retention rules matter here — a departed member's reports stay,
+  their access does not.

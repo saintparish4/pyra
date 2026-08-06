@@ -1,0 +1,69 @@
+---
+sidebar_position: 4
+title: Import
+sidebar_label: Import
+description: Bringing historical records in from NFIRS flat files and vendor exports.
+---
+
+Import is the reason a department can leave its current vendor. Twenty years of incident
+history is the lock-in; moving it is the product.
+
+:::info Stub
+
+`@pyra/import` currently contains the `Parser` interface and empty folders for the two target
+formats. No parser is implemented — the record shape they map *into* does not exist yet.
+
+:::
+
+## Why it's blocked
+
+A parser has two halves: reading the vendor's format, and mapping it onto ours. The first half
+could be written today. The second half targets the NERIS incident model, which is
+[still pending](./schema.mdx) — so building parsers now would mean writing the mapping twice.
+
+The reading half is not wasted work, and it is where the surprises live (encoding, delimiters,
+twenty years of schema drift within a single vendor's own exports). It just doesn't ship
+alone.
+
+## The interface
+
+```ts
+export interface Parser<TRecord> {
+  readonly id: string;
+  parse(source: AsyncIterable<Uint8Array>): AsyncIterable<TRecord>;
+}
+```
+
+Two properties matter. `TRecord` is unbound because the vendor's record shape is the vendor's
+business — mapping to NERIS is a separate stage, not the parser's job. And `parse` streams,
+because a department's full history is a multi-hundred-megabyte export that must never be held
+in memory whole.
+
+`AsyncIterable<Uint8Array>` means a Node stream, a fetch body, or an in-memory buffer all
+satisfy it without the parser caring which.
+
+## Target formats
+
+**NFIRS flat file** comes first. It is a public format, every department has an export in it,
+and NERIS publishes an `NFIRS Crosswalk` column in `type_incident.yml` that maps the old
+incident type codes onto the new ones — so the hardest part of the mapping is supplied rather
+than guessed.
+
+**Emergency Reporting** comes second. It exports its own CSV/XLSX layout rather than raw
+NFIRS, so it needs its own dialect handling — and real sample exports from a pilot department,
+which we don't have yet.
+
+## The planned pipeline
+
+Upload → parse → land in staging tables → review the proposed mapping → dry run → commit.
+
+The review and dry-run steps are not optional polish. An import that silently drops or
+mangles 3% of a department's history is worse than no import, because nobody finds out for
+years. Records that don't map cleanly are preserved verbatim in JSONB rather than discarded.
+
+## Not written yet
+
+- Both parsers, the staging tables, the mapping-review UI, and the dry run — all Phase 3.
+- The acceptance test: one real department's full history imported with under 1% unresolved
+  records.
+- Rollback. What "undo that import" means once records are live.

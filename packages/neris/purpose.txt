@@ -1,0 +1,1 @@
+# NERIS types + value sets, generated from the official dictionary; empty until UL enrollment
