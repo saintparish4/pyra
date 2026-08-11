@@ -2,5 +2,5 @@
 //
 // Emergency Reporting exports its own CSV/XLSX layout rather than raw NFIRS,
 // so this parser owns that dialect. Waits on `@pyra/neris` for the target
-// shape, same as `../nfirs-flatfile`.
+// shape, same as `../nfirs_flatfile`.
 export {};

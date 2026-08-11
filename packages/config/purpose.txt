@@ -1,1 +1,3 @@
-# eslint, tsconfig, prettier presets
+# tsconfig presets
+# tsconfig.base.json  — Node/NodeNext workspaces (api, db, shared, import, neris)
+# tsconfig.react.json — browser workspaces (web): DOM libs, bundler resolution, JSX

@@ -12,6 +12,7 @@ COPY apps/web/package.json apps/web/
 COPY packages/config/package.json packages/config/
 COPY packages/db/package.json packages/db/
 COPY packages/import/package.json packages/import/
+COPY packages/neris/package.json packages/neris/
 COPY packages/shared/package.json packages/shared/
 COPY docs/package.json docs/
 RUN pnpm install --frozen-lockfile --filter "@pyra/web..."

@@ -1,40 +1,36 @@
 {
-  "name": "@pyra/web",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "typecheck": "tsc -b --noEmit",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@pyra/shared": "workspace:*",
-    "@tanstack/react-query": "^5.101.2",
-    "@tanstack/react-router": "^1.170.18",
-    "@trpc/client": "^11.18.0",
-    "@trpc/react-query": "^11.18.0",
-    "better-auth": "^1.6.23",
-    "dexie": "^4.4.4",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "vite-plugin-pwa": "^1.3.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@pyra/api": "workspace:*",
-    "@types/node": "^24.13.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
-    "eslint": "^10.6.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "^8.62.0",
-    "vite": "^8.1.1"
-  }
+	"name": "@pyra/web",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"typecheck": "tsc -b --noEmit",
+		"preview": "vite preview",
+		"test:e2e": "playwright test"
+	},
+	"dependencies": {
+		"@pyra/shared": "workspace:*",
+		"@tanstack/react-query": "^5.101.2",
+		"@tanstack/react-router": "^1.170.18",
+		"@trpc/client": "^11.18.0",
+		"@trpc/react-query": "^11.18.0",
+		"better-auth": "^1.6.23",
+		"dexie": "^4.4.4",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"vite-plugin-pwa": "^1.3.0"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.62.1",
+		"@pyra/api": "workspace:*",
+		"@pyra/config": "workspace:*",
+		"@types/node": "^26.1.1",
+		"@types/react": "^19.2.17",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^6.0.3",
+		"typescript": "~6.0.3",
+		"vite": "^8.1.1"
+	}
 }

@@ -1,26 +1,27 @@
 {
-  "name": "@pyra/db",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "scripts": {
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "studio": "drizzle-kit studio",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
-  },
-  "dependencies": {
-    "drizzle-orm": "^0.45.2",
-    "postgres": "^3.4.9"
-  },
-  "devDependencies": {
-    "@pyra/config": "workspace:*",
-    "@types/node": "^26.1.1",
-    "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.31.10",
-    "eslint": "^9.28.0",
-    "typescript": "~6.0.3"
-  }
+	"name": "@pyra/db",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"generate": "drizzle-kit generate",
+		"migrate": "drizzle-kit migrate",
+		"studio": "drizzle-kit studio",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.2",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@pyra/config": "workspace:*",
+		"@types/node": "^26.1.1",
+		"dotenv": "^17.4.2",
+		"drizzle-kit": "^0.31.10",
+		"typescript": "~6.0.3"
+	}
 }

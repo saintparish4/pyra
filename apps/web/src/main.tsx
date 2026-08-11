@@ -12,22 +12,33 @@ const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 const queryClient = new QueryClient();
 const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: `${apiUrl}/trpc`,
-      fetch(url, options) {
-        return fetch(url, { ...options, credentials: "include" });
-      },
-    }),
-  ],
+	links: [
+		httpBatchLink({
+			url: `${apiUrl}/trpc`,
+			fetch(url, options) {
+				// tRPC types `signal` as optional-undefined, the DOM types it as
+				// `AbortSignal | null`; spreading it through would not narrow.
+				return fetch(url, {
+					...options,
+					credentials: "include",
+					signal: options?.signal ?? null,
+				});
+			},
+		}),
+	],
 });
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </trpc.Provider>
-  </StrictMode>,
+const rootEl = document.getElementById("root");
+if (!rootEl) {
+	throw new Error("Root element #root not found");
+}
+
+createRoot(rootEl).render(
+	<StrictMode>
+		<trpc.Provider client={trpcClient} queryClient={queryClient}>
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>
+		</trpc.Provider>
+	</StrictMode>,
 );

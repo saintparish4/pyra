@@ -1,8 +1,13 @@
 node_modules
 dist
+dist-ssr
 .env
+.env.test
+*.local
 .turbo
 coverage
+playwright-report
+test-results
 PYRA_PRD.md
 .claude
 DESIGN.md
@@ -10,3 +15,6 @@ AGENTS.md
 # Leading slash anchors this to the repo root. Unanchored, it also matches
 # packages/neris/ (core.ignorecase is on), which must stay tracked.
 /NERIS/
+
+MIGRATION_DOC.md
+CLAUDE.md

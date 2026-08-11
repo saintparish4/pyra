@@ -1,75 +1,31 @@
-# React + TypeScript + Vite
+# @pyra/web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The browser app: React 19, Vite, TanStack Router + Query, the tRPC client, and
+the better-auth client. Setup and the full command list live in the
+[repository README](../../README.md).
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm --filter @pyra/web dev        # http://localhost:5173, expects the API on :3001
+pnpm --filter @pyra/web build      # tsc -b && vite build
+pnpm --filter @pyra/web test:e2e   # Playwright, boots the API and web dev servers
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Layout
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Path | Contents |
+| --- | --- |
+| `src/router.tsx` | Route tree; every page component is registered here |
+| `src/routes/` | Page components (`home.tsx`, `login.tsx`, `appShell.tsx`, …) |
+| `src/lib/trpc.ts` | tRPC client, typed from `@pyra/api`'s `AppRouter` |
+| `src/lib/auth.ts` | better-auth client — the only other way to reach the server |
+| `e2e/` | Playwright specs |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The server is reached through those two clients only; no component calls `fetch`
+against an API route. Validation and shared types come from `@pyra/shared`.
 
+Before the first E2E run, install the browser and seed a department:
+
+```bash
+pnpm --filter @pyra/web exec playwright install chromium
+pnpm --filter @pyra/api seed
 ```

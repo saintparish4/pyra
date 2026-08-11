@@ -8,8 +8,8 @@ import { departmentIdSchema, userIdSchema } from "./ids.js";
  * here would lock out any account seeded before the rule changed.
  */
 export const signInInputSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
+	email: z.email(),
+	password: z.string().min(1),
 });
 export type SignInInput = z.infer<typeof signInInputSchema>;
 
@@ -20,10 +20,10 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 
 /** Shape returned by the `auth.me` tRPC query. */
 export const sessionUserSchema = z.object({
-  id: userIdSchema,
-  name: z.string(),
-  email: z.email(),
-  role: userRoleSchema,
-  departmentId: departmentIdSchema,
+	id: userIdSchema,
+	name: z.string(),
+	email: z.email(),
+	role: userRoleSchema,
+	departmentId: departmentIdSchema,
 });
 export type SessionUser = z.infer<typeof sessionUserSchema>;

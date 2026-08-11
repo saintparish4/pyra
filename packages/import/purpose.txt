@@ -1,1 +1,1 @@
-# parser plugins: nfirs-flatfile/, emergency-reporting/
+# parser plugins: nfirs_flatfile/, emergency_reporting/

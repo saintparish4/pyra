@@ -34,7 +34,7 @@ before pushing doc changes.
 | --- | --- |
 | `docs/` | The doc pages. Sidebar order comes from `sidebar_position` frontmatter |
 | `src/pages/index.tsx` | Homepage hero |
-| `src/components/HomepageFeatures/` | The section cards below the hero |
+| `src/components/homepage_features/` | The section cards below the hero |
 | `src/css/custom.css` | Infima theme variables |
 | `docusaurus.config.ts` | Site config, navbar, footer, announcement bar |
 

@@ -1,23 +1,35 @@
 {
-  "name": "pyra",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck", 
-    "test": "turbo run test" 
-  },
-  "devDependencies": {
-    "prettier": "^3.5.3",
-    "turbo": "^2.10.5",
-    "typescript": "~6.0.3"
-  },
-  "keywords": [],
-  "author": "Sharif Parish",
-  "license": "ISC",
-  "packageManager": "pnpm@11.5.1",
-  "type": "module"
+	"name": "pyra",
+	"version": "1.0.0",
+	"description": "Self-hostable records management system for US fire departments",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"format:check": "biome format .",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"test:integration": "pnpm --filter @pyra/api test:integration",
+		"test:e2e": "pnpm --filter @pyra/web test:e2e",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.7",
+		"husky": "^9.1.7",
+		"turbo": "^2.10.5",
+		"typescript": "~6.0.3"
+	},
+	"keywords": [
+		"fire-department",
+		"neris",
+		"nfirs",
+		"rms",
+		"self-hosted"
+	],
+	"author": "Sharif Parish",
+	"license": "AGPL-3.0-only",
+	"packageManager": "pnpm@11.5.1"
 }

@@ -1,477 +1,481 @@
-@import url('https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&family=Inter:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif:opsz@12..24&family=Inter:wght@400;500;600&display=swap");
 
 /* PYRA design tokens — see apps/web/DESIGN.md ("sunlit wildflower compliance atelier") */
 
 :root {
-  /* Colors */
-  --color-deep-ink: #130e30;
-  --color-hi-yellow: #ffe228;
-  --color-moss-green: #59e25d;
-  --color-fuchsia: #e261e5;
-  --color-slate: #5f5c6e;
-  --color-canvas: #f9fbf2;
-  --color-soft-meadow: #eff2e5;
-  --color-charcoal: #222222;
-  --color-onyx: #000000;
+	/* Colors */
+	--color-deep-ink: #130e30;
+	--color-hi-yellow: #ffe228;
+	--color-moss-green: #59e25d;
+	--color-fuchsia: #e261e5;
+	--color-slate: #5f5c6e;
+	--color-canvas: #f9fbf2;
+	--color-soft-meadow: #eff2e5;
+	--color-charcoal: #222222;
+	--color-onyx: #000000;
 
-  /* Typography */
-  --font-serif: 'Hedvig Letters Serif', ui-serif, Georgia, Cambria,
-    'Times New Roman', Times, serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system,
-    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+	/* Typography */
+	--font-serif:
+		"Hedvig Letters Serif", ui-serif, Georgia, Cambria, "Times New Roman",
+		Times, serif;
+	--font-sans:
+		"Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+		"Segoe UI", Roboto, sans-serif;
+	--mono: ui-monospace, Consolas, monospace;
 
-  /* Shape */
-  --radius-card: 24px;
-  --radius-pill: 1440px;
+	/* Shape */
+	--radius-card: 24px;
+	--radius-pill: 1440px;
 
-  /* Semantic aliases shared across routes */
-  --text: var(--color-deep-ink);
-  --text-dim: var(--color-slate);
-  --text-h: var(--color-deep-ink);
-  --bg: var(--color-canvas);
-  --surface: var(--color-soft-meadow);
-  --border: rgba(19, 14, 48, 0.18);
-  --hairline: rgba(19, 14, 48, 0.1);
-  --ok: #2f8a43;
-  --ok-glow: rgba(47, 138, 67, 0.14);
-  --err: #c2453b;
-  --err-glow: rgba(194, 69, 59, 0.12);
+	/* Semantic aliases shared across routes */
+	--text: var(--color-deep-ink);
+	--text-dim: var(--color-slate);
+	--text-h: var(--color-deep-ink);
+	--bg: var(--color-canvas);
+	--surface: var(--color-soft-meadow);
+	--border: rgba(19, 14, 48, 0.18);
+	--hairline: rgba(19, 14, 48, 0.1);
+	--ok: #2f8a43;
+	--ok-glow: rgba(47, 138, 67, 0.14);
+	--err: #c2453b;
+	--err-glow: rgba(194, 69, 59, 0.12);
 
-  font: 16px/1.5 var(--font-sans);
-  letter-spacing: -0.01em;
-  font-feature-settings: 'ss01' on, 'cv11' on;
-  color-scheme: light;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	font: 16px / 1.5 var(--font-sans);
+	letter-spacing: -0.01em;
+	font-feature-settings:
+		"ss01" on,
+		"cv11" on;
+	color-scheme: light;
+	color: var(--text);
+	background: var(--bg);
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  background: var(--bg);
-  overflow-x: clip;
+	margin: 0;
+	background: var(--bg);
+	overflow-x: clip;
 }
 
 #root {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+	min-height: 100svh;
+	display: flex;
+	flex-direction: column;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--color-deep-ink);
-  margin: 0;
+	font-family: var(--font-serif);
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	color: var(--color-deep-ink);
+	margin: 0;
 }
 
 h1 {
-  font-size: clamp(40px, 6vw, 64px);
-  line-height: 1.02;
+	font-size: clamp(40px, 6vw, 64px);
+	line-height: 1.02;
 }
 
 h2 {
-  font-size: clamp(30px, 4.2vw, 48px);
-  line-height: 1.1;
+	font-size: clamp(30px, 4.2vw, 48px);
+	line-height: 1.1;
 }
 
 h3 {
-  font-size: 22px;
-  line-height: 1.25;
+	font-size: 22px;
+	line-height: 1.25;
 }
 
 p {
-  margin: 0;
+	margin: 0;
 }
 
 code {
-  font-family: var(--mono);
-  font-size: 14px;
-  line-height: 135%;
-  padding: 4px 8px;
-  border-radius: 8px;
-  color: var(--color-deep-ink);
-  background: var(--color-soft-meadow);
+	font-family: var(--mono);
+	font-size: 14px;
+	line-height: 135%;
+	padding: 4px 8px;
+	border-radius: 8px;
+	color: var(--color-deep-ink);
+	background: var(--color-soft-meadow);
 }
 
 /* ---------- Buttons (shared) ---------- */
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease,
-    filter 160ms ease,
-    transform 160ms ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px 24px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-pill);
+	font-family: var(--font-sans);
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease,
+		border-color 160ms ease,
+		filter 160ms ease,
+		transform 160ms ease;
 }
 
 .btn:active {
-  transform: translateY(1px);
+	transform: translateY(1px);
 }
 
 .btn-primary {
-  background: var(--color-hi-yellow);
-  color: var(--color-deep-ink);
+	background: var(--color-hi-yellow);
+	color: var(--color-deep-ink);
 }
 
 .btn-primary:hover {
-  filter: brightness(0.96);
+	filter: brightness(0.96);
 }
 
 .btn-dark {
-  background: var(--color-deep-ink);
-  color: #ffffff;
+	background: var(--color-deep-ink);
+	color: #ffffff;
 }
 
 .btn-dark:hover {
-  filter: brightness(1.25);
+	filter: brightness(1.25);
 }
 
 .btn-ghost {
-  background: transparent;
-  border-color: var(--color-deep-ink);
-  color: var(--color-deep-ink);
+	background: transparent;
+	border-color: var(--color-deep-ink);
+	color: var(--color-deep-ink);
 }
 
 .btn-ghost:hover {
-  background: var(--color-soft-meadow);
+	background: var(--color-soft-meadow);
 }
 
 .btn-ghost-light {
-  background: transparent;
-  border-color: rgba(249, 251, 242, 0.5);
-  color: var(--color-canvas);
+	background: transparent;
+	border-color: rgba(249, 251, 242, 0.5);
+	color: var(--color-canvas);
 }
 
 .btn-ghost-light:hover {
-  background: rgba(249, 251, 242, 0.12);
+	background: rgba(249, 251, 242, 0.12);
 }
 
 .btn-nav {
-  padding: 10px 20px;
-  font-size: 15px;
+	padding: 10px 20px;
+	font-size: 15px;
 }
 
 /* ---------- Chrome: header / nav / footer ---------- */
 
 .site-header {
-  padding-top: 16px;
-  padding-left: max(24px, env(safe-area-inset-left));
-  padding-right: max(24px, env(safe-area-inset-right));
+	padding-top: 16px;
+	padding-left: max(24px, env(safe-area-inset-left));
+	padding-right: max(24px, env(safe-area-inset-right));
 }
 
 .site-nav {
-  width: min(1200px, 100%);
-  margin: 0 auto;
-  min-height: 64px;
-  padding: 8px 10px 8px 22px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--color-soft-meadow);
-  border-radius: var(--radius-pill);
+	width: min(1200px, 100%);
+	margin: 0 auto;
+	min-height: 64px;
+	padding: 8px 10px 8px 22px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	background: var(--color-soft-meadow);
+	border-radius: var(--radius-pill);
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--color-deep-ink);
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+	color: var(--color-deep-ink);
 }
 
 .brand-mark {
-  width: 22px;
-  height: 22px;
-  display: block;
+	width: 22px;
+	height: 22px;
+	display: block;
 }
 
 .brand-name {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  letter-spacing: -0.01em;
-  transform: translateY(-1px);
+	font-family: var(--font-serif);
+	font-size: 22px;
+	letter-spacing: -0.01em;
+	transform: translateY(-1px);
 }
 
 .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-inline: auto;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-inline: auto;
 }
 
 .nav-links a {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--color-deep-ink);
-  text-decoration: none;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease;
+	display: inline-block;
+	padding: 8px 14px;
+	border-radius: var(--radius-pill);
+	font-size: 15px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--color-deep-ink);
+	text-decoration: none;
+	transition:
+		color 160ms ease,
+		background-color 160ms ease;
 }
 
 .nav-links a:hover {
-  background: var(--color-canvas);
+	background: var(--color-canvas);
 }
 
-.nav-links a[data-status='active'],
-.nav-links a[aria-current='page'] {
-  background: var(--color-canvas);
+.nav-links a[data-status="active"],
+.nav-links a[aria-current="page"] {
+	background: var(--color-canvas);
 }
 
 .nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 @media (max-width: 760px) {
-  .nav-links {
-    display: none;
-  }
+	.nav-links {
+		display: none;
+	}
 
-  .nav-actions {
-    margin-left: auto;
-  }
+	.nav-actions {
+		margin-left: auto;
+	}
 }
 
 @media (max-width: 480px) {
-  .site-header {
-    padding: 12px 16px 0;
-  }
+	.site-header {
+		padding: 12px 16px 0;
+	}
 
-  .site-nav {
-    min-height: 56px;
-    padding: 6px 8px 6px 16px;
-    gap: 8px;
-  }
+	.site-nav {
+		min-height: 56px;
+		padding: 6px 8px 6px 16px;
+		gap: 8px;
+	}
 
-  .brand-name {
-    font-size: 20px;
-  }
+	.brand-name {
+		font-size: 20px;
+	}
 
-  .btn-nav {
-    padding: 9px 15px;
-    font-size: 14px;
-  }
+	.btn-nav {
+		padding: 9px 15px;
+		font-size: 14px;
+	}
 }
 
 /* brand + both CTAs still have to fit a 320px viewport */
 @media (max-width: 380px) {
-  .site-nav {
-    padding-left: 12px;
-    gap: 6px;
-  }
+	.site-nav {
+		padding-left: 12px;
+		gap: 6px;
+	}
 
-  .nav-actions {
-    gap: 6px;
-  }
+	.nav-actions {
+		gap: 6px;
+	}
 
-  .btn-nav {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
+	.btn-nav {
+		padding: 8px 12px;
+		font-size: 13px;
+	}
 }
 
 .site-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: min(1248px, 100%);
-  margin: 0 auto;
-  padding-left: max(24px, env(safe-area-inset-left));
-  padding-right: max(24px, env(safe-area-inset-right));
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	width: min(1248px, 100%);
+	margin: 0 auto;
+	padding-left: max(24px, env(safe-area-inset-left));
+	padding-right: max(24px, env(safe-area-inset-right));
 }
 
 @media (max-width: 560px) {
-  .site-main {
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-  }
+	.site-main {
+		padding-left: max(16px, env(safe-area-inset-left));
+		padding-right: max(16px, env(safe-area-inset-right));
+	}
 }
 
 .site-footer {
-  padding: 20px 24px calc(20px + env(safe-area-inset-bottom));
-  text-align: center;
+	padding: 20px 24px calc(20px + env(safe-area-inset-bottom));
+	text-align: center;
 }
 
 .site-footer p {
-  font-size: 13px;
-  color: var(--color-slate);
+	font-size: 13px;
+	color: var(--color-slate);
 }
 
 /* ---------- Placeholder panels (Login / App) ---------- */
 
 .page {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  padding: 48px 0 96px;
+	flex: 1;
+	display: grid;
+	place-items: center;
+	padding: 48px 0 96px;
 }
 
 .panel {
-  width: min(440px, 100%);
-  padding: 48px 40px 40px;
-  text-align: center;
-  background: var(--color-soft-meadow);
-  border-radius: var(--radius-card);
+	width: min(440px, 100%);
+	padding: 48px 40px 40px;
+	text-align: center;
+	background: var(--color-soft-meadow);
+	border-radius: var(--radius-card);
 }
 
 .panel-kicker {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  color: var(--color-slate);
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--color-slate);
 }
 
 .panel h1 {
-  font-size: 32px;
-  margin: 14px 0 10px;
+	font-size: 32px;
+	margin: 14px 0 10px;
 }
 
 .panel p {
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--color-slate);
+	font-size: 15px;
+	line-height: 1.5;
+	color: var(--color-slate);
 }
 
 .panel a {
-  color: var(--color-deep-ink);
+	color: var(--color-deep-ink);
 }
 
 .panel-links {
-  margin-top: 24px;
-  display: grid;
-  gap: 8px;
+	margin-top: 24px;
+	display: grid;
+	gap: 8px;
 }
 
 .panel-links a {
-  display: block;
-  padding: 11px 16px;
-  background: var(--color-canvas);
-  border-radius: var(--radius-pill);
-  color: var(--color-deep-ink);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition:
-    background-color 160ms ease,
-    color 160ms ease;
+	display: block;
+	padding: 11px 16px;
+	background: var(--color-canvas);
+	border-radius: var(--radius-pill);
+	color: var(--color-deep-ink);
+	font-size: 14px;
+	font-weight: 500;
+	text-decoration: none;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
 }
 
 .panel-links a:hover {
-  background: var(--color-deep-ink);
-  color: #ffffff;
+	background: var(--color-deep-ink);
+	color: #ffffff;
 }
 
 .auth-form {
-  margin-top: 24px;
-  display: grid;
-  gap: 16px;
-  text-align: left;
+	margin-top: 24px;
+	display: grid;
+	gap: 16px;
+	text-align: left;
 }
 
 .auth-form label {
-  display: grid;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  color: var(--color-slate);
+	display: grid;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--color-slate);
 }
 
 .auth-form input {
-  padding: 12px 18px;
-  font: 400 16px/1.4 var(--font-sans);
-  letter-spacing: -0.01em;
-  color: var(--color-deep-ink);
-  background: #ffffff;
-  border: 1px solid var(--color-onyx);
-  border-radius: var(--radius-pill);
+	padding: 12px 18px;
+	font: 400 16px / 1.4 var(--font-sans);
+	letter-spacing: -0.01em;
+	color: var(--color-deep-ink);
+	background: #ffffff;
+	border: 1px solid var(--color-onyx);
+	border-radius: var(--radius-pill);
 }
 
 .auth-form input::placeholder {
-  color: var(--color-slate);
+	color: var(--color-slate);
 }
 
 .auth-form input:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-hi-yellow);
+	outline: none;
+	box-shadow: 0 0 0 3px var(--color-hi-yellow);
 }
 
 .auth-form button {
-  padding: 12px 24px;
-  font: 500 16px/1.2 var(--font-sans);
-  letter-spacing: -0.01em;
-  color: var(--color-deep-ink);
-  background: var(--color-hi-yellow);
-  border: none;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
+	padding: 12px 24px;
+	font: 500 16px / 1.2 var(--font-sans);
+	letter-spacing: -0.01em;
+	color: var(--color-deep-ink);
+	background: var(--color-hi-yellow);
+	border: none;
+	border-radius: var(--radius-pill);
+	cursor: pointer;
 }
 
 .auth-form button:hover {
-  filter: brightness(0.96);
+	filter: brightness(0.96);
 }
 
 .auth-form button:disabled {
-  opacity: 0.6;
-  cursor: default;
-  filter: none;
+	opacity: 0.6;
+	cursor: default;
+	filter: none;
 }
 
 .auth-signout {
-  margin-top: 20px;
-  padding: 11px 22px;
-  font: 500 15px/1.2 var(--font-sans);
-  color: var(--color-deep-ink);
-  background: transparent;
-  border: 1px solid var(--color-deep-ink);
-  border-radius: var(--radius-pill);
-  cursor: pointer;
+	margin-top: 20px;
+	padding: 11px 22px;
+	font: 500 15px / 1.2 var(--font-sans);
+	color: var(--color-deep-ink);
+	background: transparent;
+	border: 1px solid var(--color-deep-ink);
+	border-radius: var(--radius-pill);
+	cursor: pointer;
 }
 
 .auth-signout:hover {
-  background: var(--color-canvas);
+	background: var(--color-canvas);
 }
 
 .auth-error {
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
-  background: var(--err-glow);
-  color: var(--err);
-  font-size: 14px;
+	padding: 9px 16px;
+	border-radius: var(--radius-pill);
+	background: var(--err-glow);
+	color: var(--err);
+	font-size: 14px;
 }
