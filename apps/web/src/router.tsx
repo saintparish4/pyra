@@ -2,19 +2,19 @@ import {
 	createRootRoute,
 	createRoute,
 	createRouter,
+	lazyRouteComponent,
 } from "@tanstack/react-router";
 
-import { AppShell } from "./routes/appShell";
 import { Home } from "./routes/home";
-import { Login } from "./routes/login";
 import { RootLayout } from "./routes/rootLayout";
-import {
-	AdminPage,
-	AdrsPage,
-	DeployPage,
-	ImportPage,
-	SchemaPage,
-} from "./routes/stubs";
+
+/*
+ * Only the landing page is in the first bundle. Everything behind it pulls in
+ * better-auth and the workspace shell, which a visitor reading the marketing
+ * page never needs — and that visitor is most of the traffic.
+ */
+const lazyStub = (name: keyof typeof import("./routes/stubs")) =>
+	lazyRouteComponent(() => import("./routes/stubs"), name);
 
 const rootRoute = createRootRoute({
 	component: RootLayout,
@@ -29,43 +29,43 @@ const indexRoute = createRoute({
 const loginRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/login",
-	component: Login,
+	component: lazyRouteComponent(() => import("./routes/login"), "Login"),
 });
 
 const appRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/app",
-	component: AppShell,
+	component: lazyRouteComponent(() => import("./routes/appShell"), "AppShell"),
 });
 
 const deployRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/deploy",
-	component: DeployPage,
+	component: lazyStub("DeployPage"),
 });
 
 const adminRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/admin",
-	component: AdminPage,
+	component: lazyStub("AdminPage"),
 });
 
 const importRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/import",
-	component: ImportPage,
+	component: lazyStub("ImportPage"),
 });
 
 const schemaRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/schema",
-	component: SchemaPage,
+	component: lazyStub("SchemaPage"),
 });
 
 const adrsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/adrs",
-	component: AdrsPage,
+	component: lazyStub("AdrsPage"),
 });
 
 const routeTree = rootRoute.addChildren([
