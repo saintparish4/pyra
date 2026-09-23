@@ -1,60 +1,72 @@
 # Pyra — Next Steps
 
-**As of:** 2026-09-22 · **Companion:** [`current-state.md`](./current-state.md)
+**As of:** 2026-09-23 · **Companion:** [`current-state.md`](./current-state.md)
 **Derived from:** [`base/BUILD_PLAN.md`](../base/BUILD_PLAN.md) §5 and §8
 
-The previous ten-step list is mostly behind us. Steps 1, 3, 6, and 7 are written; steps 4 and 5
-are written and need one command. What follows is what is actually left, in order.
+The previous ten-step list is behind us: everything it named is written, committed, and green
+in CI. What follows is what is actually left, in order.
 
-Step 0 is not optional and comes before everything: **nothing here has been run.**
+Step 0 is half done. The half that remains is the half that needs a database.
 
 ---
 
-## 0 · Run it — *~1 hour*
+## 0 · Put it on a database — *~1 hour*
 
-In this order. The order matters: `@pyra/neris` has tests and typechecks that import
-`src/generated/`, which does not exist until the generator runs.
+**Done.** The static half ran on 2026-09-23 and is green in CI:
 
 ```bash
-pnpm install                                  # new deps: js-yaml, @types/js-yaml, tsx in two packages
-pnpm --filter @pyra/neris generate            # writes packages/neris/src/generated/ — commit the output
-pnpm --filter @pyra/db generate               # migration for audit_log
-pnpm --filter @pyra/db migrate
-pnpm --filter @pyra/db harden                 # roles, grants, RLS. Idempotent
+pnpm install                                  # lockfile committed in 42e8283
+pnpm --filter @pyra/neris generate            # output committed in 6ca701f
+pnpm --filter @pyra/db generate               # migration 0002 committed in be4e3eb
 pnpm format && pnpm lint && pnpm typecheck && pnpm test
-pnpm test:integration                         # needs the _test database
 ```
 
-Expect friction in three specific places, because they are the parts that could not be verified
-without running them:
+Four defects were sitting in code that had never been executed: the generator threw on
+`format: uuid` and had produced no output at all, `withTenant` was `async` without an `await`,
+about a hundred lines had never seen the formatter, and the lockfile had never been regenerated
+— so CI could not get past `--frozen-lockfile`. The schemas.ts recursion worry was unfounded;
+`LocationPayload`'s getters typecheck as written.
 
-- **`packages/neris/src/generated/schemas.ts`** is ~550 zod declarations emitted in dependency
-  order. `LocationPayload` and `LocationResponse` reference themselves, and the generator emits
-  those two properties as getters — zod 4's documented recursive pattern. If TypeScript
-  complains about a circular type annotation, that is where.
-- **`sql/tenancy.sql`** runs as two `DO` blocks. If `harden` fails, it fails loudly and nothing
-  is half-applied.
-- **`pnpm test`** will fail before `generate` has run, with a missing-module error. That is
-  expected, not a bug.
+**Left.** Needs a Postgres. Nothing below this line has been observed even once:
 
-**Exit:** all four checks green, `src/generated/` committed.
+```bash
+docker compose -f deploy/docker-compose.yml up -d postgres
+pnpm --filter @pyra/db migrate                # applies 0002_robust_wendell_rand
+pnpm --filter @pyra/db harden                 # roles, grants, RLS. Idempotent
+pnpm test:integration                         # .env.test already points at a *_test
+                                              # database; create it if it is not there
+pnpm test:e2e                                 # needs the app running
+```
+
+Expect friction in two places:
+
+- **`sql/tenancy.sql`** runs as two `DO` blocks and has never executed. If `harden` fails it
+  fails loudly and nothing is half-applied. It iterates `array['audit_log']`, so it has to run
+  *after* migrate, not before.
+- **`tenancy.integration.test.ts`** is the first real test of the RLS claim — that a caller for
+  one department cannot read, update, or delete another's rows, and cannot rewrite the audit log
+  at all. Its setup applies `tenancy.sql` to the test database, so a failure there is as likely
+  to be the policy file as the test.
+
+**Exit:** the tenancy suite green against a real Postgres. Until then ADR-0003 is a design, not
+a guarantee, and `current-state.md` §2 describes code that typechecks rather than a database
+that was observed refusing a cross-tenant read.
 
 ---
 
 ## 1 · Decide the hero experiment — *~30 minutes* · **needs you**
 
-The only item in the working tree that is genuinely a judgement call.
+The one item on this page that is a taste judgement rather than engineering.
 
 `apps/web/src/hero/` (WebGL colour field — `colorField.tsx`, `shader.ts`, two GLSL files) is
-**imported by nothing**. `home.tsx` only uses `hero-*` CSS class names. Either wire it into
-`home.tsx` and commit it, or delete it along with the `biome.json` shader ignore and the
-`vite-env.d.ts` `?raw` declarations.
+committed as of `fda5432` and **imported by nothing**. `home.tsx` only uses `hero-*` CSS class
+names. It was six weeks of dirty `git status`; now it is dead code in `master`, which is quieter
+and therefore easier to forget. Either wire it into `home.tsx`, or delete it.
 
-"Keep it uncommitted" is the one option that costs something — it has already cost six weeks of
-a dirty `git status`.
-
-**Careful:** `biome.json` now carries two unrelated changes. The `*.glsl` / `*.vert` / `*.frag`
-ignore belongs to the hero work; `!packages/neris/src/generated/**` does not, and must survive.
+**If you delete it**, three things go with it: the `*.glsl` / `*.vert` / `*.frag` entries in
+`biome.json`, and the `*.vert?raw` / `*.frag?raw` declarations in `apps/web/src/vite-env.d.ts`.
+The `!packages/neris/src/generated/**` ignore in the same `biome.json` list is unrelated and
+must survive.
 
 ---
 
@@ -183,9 +195,12 @@ enforces instead of a metric we hope for. Treat a harness failure as a build bre
 Small and currently generating friction. Fold into whichever step you touch next.
 
 - `.github/workflows/deploy.yml` and `.github/workflows/security.yml` are **0 bytes**. An empty
-  workflow file is an invalid workflow, not an absent one — GitHub reports it as failing. Write
-  them or delete them.
-- `.github/CODEOWNERS` and `.github/dependabot.yml` are also 0 bytes.
+  workflow file is an invalid workflow, not an absent one: GitHub opens a run for each on every
+  push and fails it in 0s. Two permanent red X's beside a green CI run, since `0b9db6c`. Write
+  them or delete them — this is the cheapest item on this page.
+- `.github/CODEOWNERS`, `.github/dependabot.yml`, `.github/ISSUE_TEMPLATE/bug.yml`, and
+  `.github/ISSUE_TEMPLATE/feature.yml` are also 0 bytes. Harmless, but they advertise process
+  that does not exist.
 - `base/BUILD_PLAN.md` §1 and §6 now describe a repo that no longer exists, and §2's claim that
   `LAWENFORCE` is API-only is wrong — it is in the YAML. Annotate or supersede it; it is still
   the source of truth for §3–§5.
