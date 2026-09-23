@@ -54,19 +54,19 @@ that was observed refusing a cross-tenant read.
 
 ---
 
-## 1 · Decide the hero experiment — *~30 minutes* · **needs you**
+## 1 · The hero experiment — **settled**
 
-The one item on this page that is a taste judgement rather than engineering.
+`apps/web/src/hero/` is wired into the landing hero and is no longer dead code. The decision
+went the way it did because the shader turned out to be the brand: its three stops — ember
+`#e8400d`, cream `#ffeed8`, lilac `#d0b2ff` — are now the palette the whole site derives from,
+so deleting it would have meant inventing a warm range twice.
 
-`apps/web/src/hero/` (WebGL colour field — `colorField.tsx`, `shader.ts`, two GLSL files) is
-committed as of `fda5432` and **imported by nothing**. `home.tsx` only uses `hero-*` CSS class
-names. It was six weeks of dirty `git status`; now it is dead code in `master`, which is quieter
-and therefore easier to forget. Either wire it into `home.tsx`, or delete it.
+Nothing is owed here. What is left is ordinary polish, and none of it blocks anything:
 
-**If you delete it**, three things go with it: the `*.glsl` / `*.vert` / `*.frag` entries in
-`biome.json`, and the `*.vert?raw` / `*.frag?raw` declarations in `apps/web/src/vite-env.d.ts`.
-The `!packages/neris/src/generated/**` ignore in the same `biome.json` list is unrelated and
-must survive.
+- The field is masked to dissolve into paper. Check it on a real GPU — every capture so far has
+  been headless Chromium falling back to the flat `is-static` gradient.
+- `prefers-reduced-motion` is handled by never creating the animations, so the page renders as
+  static HTML rather than as a cancelled animation. Verified: zero elements left hidden.
 
 ---
 

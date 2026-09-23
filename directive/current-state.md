@@ -30,7 +30,7 @@ code that has not been executed is inventory, not progress.
 |---|---|
 | Monorepo | pnpm 11.5.1 + Turborepo, Node 22, ESM-only, Biome 2, Husky pre-commit, CI (lint / format / typecheck / test) + a scheduled NERIS drift job. CI green in 48s |
 | `apps/api` | Fastify 5 + tRPC 11 + better-auth. `/health`, `/api/auth/*`, `/trpc`. Routers: `health.check`, `auth.me`, `audit.list`. `tenantProcedure` + `requirePermission` + `recordAudit`. pg-boss starts and still registers **zero queues** |
-| `apps/web` | React 19 + Vite, TanStack Router (manual tree) + Query, tRPC client, better-auth client. Marketing home, `/login`, `/app` shell, 5 stub pages. PWA precaches the shell only. **Untouched by this round of work** |
+| `apps/web` | React 19 + Vite, TanStack Router (manual tree) + Query, tRPC client, better-auth client. Rebuilt landing page — 13 sections, GSAP scroll vocabulary, Motion for React-lifecycle animation, the WebGL hero field mounted at last. `/login` and `/app` lazy-loaded off the landing bundle. PWA precaches the shell only |
 | `packages/db` | Drizzle + Postgres 16. 6 tables (`departments`, `users`, `sessions`, `accounts`, `verifications`, `audit_log`). 3 migrations, the third unapplied. RLS policies + grants in `sql/tenancy.sql`, applied by `harden` — **never yet run against a database** |
 | `packages/shared` | Branded `DepartmentId` / `UserId`, sign-in + session DTOs, `apiErrorSchema`, and a 4-role × 10-permission `can()` matrix. 4 unit test files, 22 tests |
 | `packages/neris` | A ~930-line generator over `NERIS/openapi.json` + the value-set YAML, and its 11,495-line output committed under `src/generated/`: ~550 zod schemas, 95 value sets, the NFIRS crosswalk, the spec version and digest. 3 test files, 18 tests, one of them the golden regeneration diff |
@@ -101,8 +101,8 @@ Two decisions remain open and are tracked in `GOVERNANCE.md` rather than invente
   with it, who holds the trademark, the domain, and the hosted infrastructure.
 - Offline sync conflict resolution for the PWA draft queue.
 
-One decision is open and **not** written down anywhere but here: whether `apps/web/src/hero/`
-lives or dies. See `next-steps.md` §1.
+The hero experiment is settled: `apps/web/src/hero/` is mounted, and its shader stops are now
+the source of the site palette. See `next-steps.md` §1.
 
 ---
 
@@ -119,7 +119,7 @@ lives or dies. See `next-steps.md` §1.
 | `789927a` | `tenantProcedure`, `requirePermission`, the audit router, and the tenancy integration suite |
 | `32435df`, `4ce8702`, `6ca701f` | The NERIS generator, the `uuid` / `email` fix that made it run, and its committed output |
 | `9b1ce64`, `c1cfbdf`, `42e8283` | Biome ignores, formatting, and the lockfile CI needed |
-| `fda5432` | `apps/web/src/hero/` — WebGL colour field, **still imported by nothing** |
+| `fda5432` | `apps/web/src/hero/` — WebGL colour field, mounted in the landing hero as of the redesign |
 | `064ef51`, `e706c6d`, `c340c9c` | ADR-0002 and 0005, the README and operator docs, and these directives |
 
 ---
