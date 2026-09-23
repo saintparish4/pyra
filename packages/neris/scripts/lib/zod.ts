@@ -45,7 +45,9 @@ export function zodFor(node: SchemaNode, context: EmitContext): string {
 		case "object":
 			return objectSchema(node, context);
 		default:
-			throw new Error(`unsupported schema node: ${JSON.stringify(node).slice(0, 200)}`);
+			throw new Error(
+				`unsupported schema node: ${JSON.stringify(node).slice(0, 200)}`,
+			);
 	}
 }
 
@@ -54,20 +56,35 @@ export function zodFor(node: SchemaNode, context: EmitContext): string {
  * member is stripped and re-applied as `.nullable()` rather than emitted as a
  * union arm — otherwise every optional field becomes a two-arm union.
  */
-function anyOf(members: SchemaNode[], node: SchemaNode, context: EmitContext): string {
+function anyOf(
+	members: SchemaNode[],
+	node: SchemaNode,
+	context: EmitContext,
+): string {
 	const nullable = members.some((member) => member.type === "null");
 	const rest = members.filter((member) => member.type !== "null");
 	if (rest.length === 0) {
-		throw new Error(`anyOf with no non-null member: ${node.title ?? "<untitled>"}`);
+		throw new Error(
+			`anyOf with no non-null member: ${node.title ?? "<untitled>"}`,
+		);
 	}
-	const base = rest.length === 1 ? zodFor(rest[0] as SchemaNode, context) : union(rest, node, context);
+	const base =
+		rest.length === 1
+			? zodFor(rest[0] as SchemaNode, context)
+			: union(rest, node, context);
 	return nullable ? `${base}.nullable()` : base;
 }
 
-function union(members: SchemaNode[], node: SchemaNode, context: EmitContext): string {
+function union(
+	members: SchemaNode[],
+	node: SchemaNode,
+	context: EmitContext,
+): string {
 	const discriminator = node.discriminator;
 	if (discriminator?.mapping) {
-		const arms = Object.values(discriminator.mapping).map((ref) => schemaConst(refName(ref)));
+		const arms = Object.values(discriminator.mapping).map((ref) =>
+			schemaConst(refName(ref)),
+		);
 		return `z.discriminatedUnion(${JSON.stringify(discriminator.propertyName)}, [${arms.join(", ")}])`;
 	}
 	const arms = members.map((member) => zodFor(member, context));
@@ -79,6 +96,12 @@ function stringSchema(node: SchemaNode): string {
 		// NERIS timestamps arrive both with an offset and without one; rejecting
 		// the bare form here would fail payloads the API itself accepts.
 		return "z.iso.datetime({ offset: true, local: true })";
+	}
+	if (node.format === "uuid") {
+		return "z.uuid()";
+	}
+	if (node.format === "email") {
+		return "z.email()";
 	}
 	if (node.format === "uri") {
 		return "z.url()";
@@ -146,11 +169,18 @@ function objectSchema(node: SchemaNode, context: EmitContext): string {
 		// A property whose subtree points back at the schema being emitted can
 		// only be expressed lazily; zod reads the getter after the binding exists.
 		if (directRefs(property).has(context.self)) {
-			lines.push(`\tget ${propertyKey(name)}() {\n\t\treturn ${expression};\n\t},`);
+			lines.push(
+				`\tget ${propertyKey(name)}() {\n\t\treturn ${expression};\n\t},`,
+			);
 		} else {
 			lines.push(`\t${propertyKey(name)}: ${expression},`);
 		}
 	}
-	const factory = extra === false ? "z.strictObject" : extra === true ? "z.looseObject" : "z.object";
+	const factory =
+		extra === false
+			? "z.strictObject"
+			: extra === true
+				? "z.looseObject"
+				: "z.object";
 	return `${factory}({\n${lines.join("\n")}\n})`;
 }
