@@ -1,0 +1,31 @@
+name: NERIS spec drift
+
+# Scheduled, never on pull requests. A contributor's PR must not go red because
+# upstream shipped a NERIS release that morning — what we want is a notification
+# addressed to the project that regeneration is due.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Reads the committed src/generated/version.ts and fetches the live spec.
+      # Needs no NERIS/ checkout. A 401 here means the spec endpoint is not
+      # public after all — see base/BUILD_PLAN.md item D.
+      - name: Check for spec drift
+        run: pnpm --filter @pyra/neris check-spec

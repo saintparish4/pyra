@@ -1,56 +1,94 @@
 # @pyra/neris
 
-NERIS types and value sets. **This package is deliberately empty.**
+NERIS types, value sets, and the NFIRS crosswalk. **Everything under `src/generated/` is
+generated from the official dictionary and committed.** Nothing here is hand-written from
+guesswork — see [ADR-0004](../../adr/0004-neris-generated.md).
 
-Types come from the official NERIS dictionary after UL enrollment. Nothing here
-is hand-written from guesswork — a field we invent now is a field we have to
-un-invent later, and every consumer (`@pyra/db`, `@pyra/import`, the API) would
-carry that mistake.
+## Generating
 
-## The reference dictionary
+The generator reads a local checkout of
+[`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework). Clone it to `NERIS/` at
+the repo root (that path is **gitignored** — the framework is upstream's to version, and
+mirroring it here would mean maintaining a copy that silently goes stale), or point
+`NERIS_FRAMEWORK_PATH` at it:
 
-Clone [`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework) to `NERIS/` at the
-repo root to work against it. That path is **gitignored** — the framework is upstream's to
-version, and mirroring it here would mean maintaining a copy that silently goes stale. What
-lands in this package is generated output, which is ours.
+```bash
+git clone https://github.com/ulfsri/neris-framework NERIS
+pnpm --filter @pyra/neris generate
+pnpm --filter @pyra/neris test
+```
 
-Paths below are relative to that local checkout:
+`generate` is the entire upgrade procedure for a dictionary bump. **Commit the diff in
+`src/generated/` — that diff is the change review.** A reviewer can see that a value went
+inactive or a type gained a level without running anything.
 
-| Path | Contents |
+Generation prints a report to stderr for the two ways the API and the value sets disagree:
+values the API carries that the YAML does not (labelled by their own value), and values the
+YAML carries that the API does not (dropped). Both are expected today; neither is silent.
+
+## What it emits
+
+| Module | Contents |
 | --- | --- |
-| `NERIS/CORE/modules/yml/` | Core module field metadata — dispatch, entity, incident, plus shared and augmentation modules |
-| `NERIS/CORE/value_sets/yml/` | 96 value sets (`type_incident`, `type_unit`, `type_action_tactic`, …) as `CAPITAL_CASE` enums |
-| `NERIS/SECONDARY/` | Community Risk Reduction, Incident Analysis, Health & Safety — still in development upstream |
-| `NERIS/MAPPINGS/` | `map_location.csv` (NENA CLDXF location mapping) and the dispatch-code → incident-type template |
-| `NERIS/openapi.json` | OpenAPI 3.1.0 spec, NERIS v1.4.78, against `https://api-test.neris.fsri.org/v1` |
+| `valueSets.ts` | Every enum in the spec as a const tuple, a zod enum, and — where a value-set YAML exists — a `ValueSetEntry` per value with `label`, `labelPath`, `levels`, `definition`, `source`, `active` |
+| `schemas.ts` | zod schemas for the ~550 component schemas reachable from the incident, entity, and error roots, with a `z.infer` type alias each |
+| `nfirsCrosswalk.ts` | `Record<NfirsCode, readonly TypeIncidentValue[]>` — NFIRS 5.0 code to the NERIS types it could mean |
+| `version.ts` | `NERIS_SPEC_VERSION`, the sha256 of the source spec, the schema digest, and the server the snapshot describes |
 
-Read `NERIS/CORE/modules/README.md` for the meaning of the metadata columns
-(`neris_core`, `possible_if`, `cardinality`, `computed_from`, …) — they encode
-conditionality and required-ness that our schemas will have to reproduce.
+Hand-written alongside it: `valueSetHelpers.ts` — `offerableValues`, `labelOf`, `childrenOf`.
 
-## Why it's still blocked
+## Three things the dictionary will surprise you with
 
-The upstream repo is the *published* framework. What enrollment unlocks is the
-production API and its authoritative schema:
+**The API and the YAML disagree, and the API wins.** `type_incident.yml` has 128 entries;
+`TypeIncidentValue` in the spec has 130. The spec adds `MEDICAL||ILLNESS` and `MEDICAL||INJURY`,
+and fixes the YAML's typo `BACKOUNTRY_RESCUE` → `BACKCOUNTRY_RESCUE`. The YAML also separates
+hierarchy levels with `: ` where the API uses `||`. Upstream states the API is the source of
+truth: **membership comes from `openapi.json`, labels come from the YAML.**
 
-- Access to the live NERIS API rather than `api-test`.
-- Confirmation that `openapi.json` v1.4.78 matches what we'll actually submit
-  against. Upstream states the API — not these files — is the source of truth,
-  and the secondary schemas are explicitly still moving.
-- A department's NERIS entity ID, without which nothing can be submitted.
+**Types are variable depth.** `LAWENFORCE` has one level, `MEDICAL||ILLNESS` two,
+`FIRE||OUTSIDE_FIRE||TRASH_RUBBISH_FIRE` three. A type picker that assumes three levels is
+wrong for a third of the dictionary. Use `childrenOf()`.
 
-## When it unblocks
+**The NFIRS crosswalk is not a function.** 161 of its 164 codes map to more than one NERIS type,
+and code `300` maps to 53. `nfirsCrosswalk` is therefore typed as arrays, always — the signature
+is what makes the ambiguity impossible to ignore. An importer that applies it automatically will
+silently mis-type most of a department's history, which is why Phase 5 has a mapping-review step
+(see [ADR-0005](../../adr/0005-imports-are-records.md)).
 
-Generate; don't transcribe. The dictionary is ~100 value sets and a dozen
-modules, all machine-readable, and it will keep changing upstream.
+## Drift
 
-1. Generate value-set unions from `NERIS/CORE/value_sets/yml/` — each file's
-   keys are the enum members, and `active: 'FALSE'` entries must be readable but
-   not offerable for new records.
-2. Generate request/response types from `NERIS/openapi.json`.
-3. Check the generated output into `src/` so a dictionary bump shows up as a
-   reviewable diff.
+```bash
+pnpm --filter @pyra/neris check-spec
+```
 
-`type_incident.yml` carries an `NFIRS Crosswalk` column — that's the seam
-`@pyra/import`'s `nfirs-flatfile` parser maps through, so generate it as data,
-not just as types.
+Fetches `openapi.yaml` from the live API and fails if the version or the schema digest has moved
+away from what `src/generated/` was built from. It runs on a **schedule**
+(`.github/workflows/spec-drift.yml`), never on the pull-request job: a contributor's PR must not
+go red because upstream shipped a release on a Tuesday.
+
+The digest is computed over the canonicalised schema graph rather than over raw bytes, because
+the local snapshot is JSON and the live spec is YAML.
+
+## Tests
+
+`src/dictionary.test.ts` asserts the facts above against the **committed** output, so it runs in
+CI with no framework checkout. `scripts/generate.test.ts` is the golden test — regenerating
+produces no diff — and skips itself when `NERIS/` is absent.
+
+If you find yourself editing a file under `src/generated/`, the golden test will fail and it is
+right to. Change the generator.
+
+## What is deliberately not here
+
+The conditional-requirement layer. 205 fields are `neris_core`, 106 carry a `possible_if`, 33 a
+`neris_core_if`, all written as inconsistent prose, and further rules live only in OpenAPI
+`description` strings — a `FIRE||STRUCTURE_FIRE` incident requires the alarm and suppression
+modules *unless all aids are `SUPPORT_AID` `GIVEN`*; a single `UNDETERMINED` type is CAD-only.
+
+**Generated schemas give shape. Conditionality has to be hand-written**, as named functions with
+stable codes under `src/rules/`, returning `{ code, path, message, severity }[]` so a form can
+distinguish *blocks submission* from *NERIS would accept this but it is thin*. That is Phase 3,
+and it is where the test pyramid is deliberately heaviest.
+
+The submission client is Phase 4 and is blocked on integration credentials, not on anything in
+this package.

@@ -1,1 +1,1 @@
-# NERIS types + value sets, generated from the official dictionary; empty until UL enrollment
+# NERIS types, value sets, and the NFIRS crosswalk, generated into src/generated/ by scripts/generate.ts
