@@ -17,12 +17,14 @@ export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * `set_config` takes the value as a bind parameter; `SET LOCAL` does not, and
  * would mean interpolating a tenant id into SQL text.
  */
-export async function withTenant<T>(
+export function withTenant<T>(
 	departmentId: DepartmentId,
 	fn: (tx: Transaction) => Promise<T>,
 ): Promise<T> {
 	return db.transaction(async (tx) => {
-		await tx.execute(sql`select set_config('app.department_id', ${departmentId}, true)`);
+		await tx.execute(
+			sql`select set_config('app.department_id', ${departmentId}, true)`,
+		);
 		return fn(tx);
 	});
 }
