@@ -1,7 +1,16 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
 	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "ignoreUnknown": false },
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!**/*.glsl",
+			"!**/*.vert",
+			"!**/*.frag",
+			"!packages/neris/src/generated/**"
+		]
+	},
 	"formatter": { "enabled": true, "indentStyle": "tab" },
 	"linter": {
 		"enabled": true,
@@ -105,7 +114,8 @@
 			"!**/dist/**",
 			"!**/node_modules/**",
 			"!**/.next/**",
-			"!**/build/**"
+			"!**/build/**",
+			"!packages/neris/src/generated/**"
 		]
 	},
 	"javascript": { "formatter": { "quoteStyle": "double" } },
