@@ -75,7 +75,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	await db.execute(
-		sql`truncate table accounts, sessions, users, verifications, departments restart identity cascade`,
+		sql`truncate table audit_log, accounts, sessions, users, verifications, departments restart identity cascade`,
 	);
 });
 
