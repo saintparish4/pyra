@@ -1,1 +1,1 @@
-# drizzle schema + postgres client; RLS policies come in Phase 1 once tables are stable
+# drizzle schema + postgres client; RLS policies and grants in sql/tenancy.sql, applied by `harden`

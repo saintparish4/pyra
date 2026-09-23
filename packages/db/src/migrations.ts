@@ -8,3 +8,12 @@ import { fileURLToPath } from "node:url";
 export const migrationsFolder = fileURLToPath(
 	new URL("../drizzle", import.meta.url),
 );
+
+/**
+ * Tenancy hardening applied after migrations (`pnpm --filter @pyra/db harden`).
+ * Exported so integration-test setup can apply the same file the deploy job
+ * does, rather than a second copy of the policies that could drift from it.
+ */
+export const tenancySqlPath = fileURLToPath(
+	new URL("../sql/tenancy.sql", import.meta.url),
+);
