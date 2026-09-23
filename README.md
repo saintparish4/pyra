@@ -61,9 +61,20 @@ pnpm --filter @pyra/db studio        # Drizzle Studio
 pnpm --filter @pyra/api seed         # idempotent; skips if the admin email exists
 ```
 
-Schema changes live in `packages/db/src/schema/`. Generate a migration, then apply it — do not hand-edit applied SQL without a new migration.
+Schema changes live in `packages/db/src/schema/`. Generate a migration, then apply it — do not hand-edit applied SQL without a new migration. Row-level security is not part of a Drizzle migration: policies, grants, and the `pyra_app` role live in `packages/db/sql/tenancy.sql` and are applied by `pnpm --filter @pyra/db harden`, which is idempotent and runs after every migration.
 
-Work on `packages/neris` only after cloning [`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework) to `NERIS/` at the repo root. That path is gitignored.
+```bash
+pnpm --filter @pyra/db harden        # roles, grants, row-level security
+```
+
+`packages/neris` is generated from a local checkout of [`ulfsri/neris-framework`](https://github.com/ulfsri/neris-framework) at `NERIS/` in the repo root — gitignored, because it is upstream's to version:
+
+```bash
+git clone https://github.com/ulfsri/neris-framework NERIS
+pnpm --filter @pyra/neris generate   # writes src/generated/; commit the diff
+```
+
+The generated output is committed, so a dictionary bump arrives as a reviewable diff. Do not edit anything under `src/generated/` — a golden test will fail, and it is right to.
 
 ## Testing
 
@@ -117,7 +128,9 @@ Root `.env` is loaded by the API and by Drizzle (`packages/db/drizzle.config.ts`
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `DATABASE_URL` | yes | Postgres connection string |
+| `DATABASE_URL` | yes | Postgres connection string for the **owner** role — migrations, `harden`, seed, tests |
+| `APP_DATABASE_URL` | no | Runtime connection string for the non-owner `pyra_app` role. Falls back to `DATABASE_URL` when unset, which is fine for single-department self-hosting. See [ADR-0003](./adr/0003-tenancy-rls.md) |
+| `PYRA_APP_PASSWORD` | no | Password for the `pyra_app` role. `pnpm --filter @pyra/db harden` creates the role when this is set and skips it otherwise. Keep it URL-safe — it goes into `APP_DATABASE_URL` |
 | `BETTER_AUTH_SECRET` | yes | Session signing secret (>= 32 chars) |
 | `BETTER_AUTH_URL` | yes | Auth base URL (dev: `http://localhost:3001`) |
 | `WEB_ORIGIN` | yes | CORS + cookie origin (dev: `http://localhost:5173`) |
@@ -140,7 +153,7 @@ Tests (`.env.test` at the repo root, plus the shell for Playwright):
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `DATABASE_URL` | yes | Integration-test database; the name must end in `_test` |
+| `DATABASE_URL` | yes | Integration-test database; the name must end in `_test`. Tests connect as the owner and rely on `FORCE ROW LEVEL SECURITY` to bind it |
 | `E2E_ADMIN_EMAIL` | no | Playwright sign-in email (default `admin@pyra.local`) |
 | `E2E_ADMIN_PASSWORD` | no | Playwright sign-in password (default `pyra-dev-admin`) |
 | `E2E_WEB_ORIGIN` | no | Web app under test (default `http://localhost:5173`) |
@@ -151,6 +164,7 @@ Self-host (`deploy/.env` — see [Deployment](#deployment)):
 | Variable | Required | Purpose |
 |---|---|---|
 | `BETTER_AUTH_SECRET` | yes | Generate with `openssl rand -base64 32` |
+| `PYRA_APP_PASSWORD` | yes | Password for the non-owner `pyra_app` role the API connects as. Generate with `openssl rand -hex 24` — it is embedded in a URL, so keep it URL-safe |
 | `SEED_ADMIN_PASSWORD` | yes | First admin password |
 | `SEED_ADMIN_NAME` | no | First admin name |
 | `SEED_ADMIN_EMAIL` | no | First admin email |
@@ -177,12 +191,12 @@ apps/api  (Fastify + tRPC + better-auth + pg-boss)
 |---|---|
 | `apps/api` | Fastify server: `/health`, `/api/auth/*`, `/trpc`, job queue |
 | `apps/web` | SPA + PWA app-shell precaching; login and stub routes |
-| `packages/db` | Drizzle schema, migrations, Postgres client |
-| `packages/shared` | Shared validators between web and API |
-| `packages/neris` | NERIS types — empty until the dictionary lands |
+| `packages/db` | Drizzle schema, migrations, Postgres client, RLS policies (`sql/tenancy.sql`) |
+| `packages/shared` | Shared validators between web and API; the role/permission matrix |
+| `packages/neris` | NERIS value sets, zod schemas, and the NFIRS crosswalk — generated into `src/generated/` |
 | `packages/import` | Legacy-import parsers — `Parser` interface only |
 | `packages/config` | Shared tsconfig presets (`tsconfig.base.json`, `tsconfig.react.json`) |
-| `deploy` | Docker Compose: Postgres, MinIO, migrate+seed, API, Nginx |
+| `deploy` | Docker Compose: Postgres, MinIO, migrate+harden+seed, API, Nginx |
 | `docs` | Docusaurus (Deploy / Admin / Import / Schema / ADR — mostly stubs) |
 | `adr` | Architecture decision records |
 
@@ -190,7 +204,9 @@ Request flow in development: browser on `:5173` talks cross-origin to `:3001` (C
 
 Auth is provisioned, not self-serve. Accounts are created by seed (or later, admin). Sessions live in Postgres via better-auth's Drizzle adapter. Jobs (NERIS retries, imports) use pg-boss in the same Postgres — no Redis.
 
-Do not model NERIS entities or incident fields until the official dictionary is in `packages/neris`. The importer maps vendor rows onto that schema; building a guessed target means rewriting both.
+Tenancy is enforced by Postgres, not by remembering a `where` clause: the API connects as a non-owner `pyra_app` role and every domain table carries `FORCE ROW LEVEL SECURITY` with a policy keyed on a transaction-local session variable. `withTenant()` in `packages/db` is the only way to set it. See [ADR-0003](./adr/0003-tenancy-rls.md).
+
+Do not model NERIS entities or incident fields by hand. Types, value sets, and the crosswalk are generated from the official dictionary into `packages/neris`; the importer maps vendor rows onto that schema, so a guessed target means rewriting both.
 
 ## Deployment
 
@@ -220,7 +236,7 @@ TLS: put Caddy / Traefik / nginx in front of port 8080 and set `PYRA_ORIGIN` to 
 
 Biome is the linter and formatter (tabs). Do not reintroduce ESLint or Prettier.
 
-External docs for operators live in `docs/`. Stack decisions go in `adr/`. Process notes belong in [`CONTRIBUTING.md`](./CONTRIBUTING.md) when that file is filled in.
+Full process notes — what gets a change rejected, how to report a security issue, when to write an ADR — are in [`CONTRIBUTING.md`](./CONTRIBUTING.md). External docs for operators live in `docs/`. Stack decisions go in `adr/`. Project governance and the licence rationale are in [`GOVERNANCE.md`](./GOVERNANCE.md).
 
 Issues: https://github.com/saintparish4/pyra/issues
 

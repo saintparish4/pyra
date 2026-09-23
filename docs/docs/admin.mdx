@@ -11,7 +11,7 @@ neighbouring departments apart on a shared instance.
 :::info Stub
 
 There is no admin UI yet. Everything below is done from the command line or the database.
-Members are provisioned by the seed script; the invite flow is Phase 1.
+Members are provisioned by the seed script; the invite flow is not built yet.
 
 :::
 
@@ -22,15 +22,58 @@ A **department** is the tenant. Every user belongs to exactly one, by a required
 cross-department user. Mutual-aid neighbours sharing a hosted instance must never see each
 other's data, so tenancy is a column on the user, not a setting.
 
-Two roles today:
+Four roles:
 
-| Role | Intent |
+| Role | May do |
 | --- | --- |
-| `admin` | Manages members, runs imports, handles deploys and backups |
-| `member` | Writes and submits reports |
+| `readonly` | Read incidents. Nothing else — for auditors, mutual-aid liaisons, and anyone who needs visibility without write access |
+| `member` | Read, create, and edit incidents |
+| `officer` | Everything a member can, plus delete, **submit to NERIS**, run imports and exports, and read the audit log |
+| `admin` | Everything, plus managing the department and its users |
 
-The role vocabulary will grow (training officer, quartermaster) as those modules land. It is a
-plain text column, deliberately, until the real set is known.
+**Submission is an officer's job on purpose.** A NERIS submission is a legal filing under the
+department's entity ID, and the person who wrote the report is not always the person
+accountable for filing it.
+
+The matrix is code, not prose: `packages/shared/src/roles.ts`, with a unit test per row. It
+answers "may this role ever do this", not "may this user do this to this row" — ownership rules
+live with the procedure that has the row in hand.
+
+The column is plain text with no check constraint, because better-auth writes it through its own
+adapter. Widening the set is a change to the shared zod enum, not a migration, and the two roles
+that predate this list — `admin` and `member` — are still valid.
+
+## Tenant isolation
+
+Departments sharing a hosted instance are frequently mutual-aid neighbours, so the guarantee
+has to be structural rather than careful.
+
+The API connects as **`pyra_app`**, a role that owns nothing. Every domain table has
+`ENABLE` + `FORCE ROW LEVEL SECURITY` with a policy keyed on a session variable, and the only
+way to set that variable is the `withTenant()` helper, which does it inside a transaction. A
+query that forgets its department scope returns **zero rows**, not every row.
+
+`FORCE` is what makes this real for operators: without it Postgres exempts the table owner from
+its own policies, so migrations, seeds, and support queries would quietly bypass isolation.
+
+Set `PYRA_APP_PASSWORD` in `deploy/.env` and the `migrate` step creates the role, applies the
+grants, and enables the policies on every `docker compose up`. It is idempotent.
+
+One carve-out, stated plainly: **better-auth's four tables (`users`, `sessions`, `accounts`,
+`verifications`) are excluded.** better-auth looks a user up by email before any session exists,
+so there is no department in scope to enforce — establishing it is the *result* of that query.
+Tenancy on those tables is enforced in procedure code and proven by integration tests. See
+[ADR-0003](https://github.com/saintparish4/pyra/blob/master/adr/0003-tenancy-rls.md).
+
+## Audit log
+
+Every mutation is recorded in `audit_log`: department, actor, entity type and id, action, and
+the before/after values. The runtime role holds `INSERT` and `SELECT` only — a grant, not a
+convention — so the application cannot rewrite its own trail.
+
+Officers and admins can read it. It is written through one helper in the tRPC layer, inside the
+same transaction as the change it describes, so an audit row can never record a change that
+then failed to land.
 
 ## Provisioning the first admin
 
@@ -62,13 +105,9 @@ Treat that as a development workaround, not a documented procedure.
 
 ## Not written yet
 
-- **Invite flow.** Admin invites by email, invitee sets their own password. Phase 1.
-- **Row-level security.** Tenant isolation is enforced by application queries today. The
-  Postgres RLS policies that make it structural — plus the tests that prove a department
-  cannot read another's rows — land with Phase 1.
+- **Invite flow.** Admin invites by email, invitee sets their own password.
 - **Two-factor auth.** TOTP is planned via better-auth's `twoFactor` plugin. Magic links are
   on the list for members who find passwords hard.
-- **Audit log.** Who changed what, when. Required before a department can rely on Pyra for
-  compliance sign-off.
+- **Audit log UI.** The table and the API exist; the chief-facing view does not.
 - **Deactivating a member.** Retention rules matter here — a departed member's reports stay,
   their access does not.

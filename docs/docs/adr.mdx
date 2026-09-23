@@ -14,6 +14,10 @@ contributor arriving in two years can tell whether the reasoning still holds.
 | ADR | Title | Status | Date |
 | --- | --- | --- | --- |
 | [0001](https://github.com/saintparish4/pyra/blob/master/adr/0001-stack-choice.md) | Stack choice | Accepted | 2026-07-18 |
+| [0002](https://github.com/saintparish4/pyra/blob/master/adr/0002-incident-storage.md) | Incident storage — typed envelope, validated JSONB payload | Accepted | 2026-09-22 |
+| [0003](https://github.com/saintparish4/pyra/blob/master/adr/0003-tenancy-rls.md) | Tenancy — Postgres RLS behind a non-owner role | Accepted | 2026-09-22 |
+| [0004](https://github.com/saintparish4/pyra/blob/master/adr/0004-neris-generated.md) | `@pyra/neris` is generated in-repo, and the output is checked in | Accepted | 2026-09-22 |
+| [0005](https://github.com/saintparish4/pyra/blob/master/adr/0005-imports-are-records.md) | Historical imports are records, not NERIS submissions | Accepted | 2026-09-22 |
 
 ADRs live in [`adr/`](https://github.com/saintparish4/pyra/tree/master/adr) in the repo, as
 plain markdown, one file per decision.
@@ -49,12 +53,42 @@ deployment footprint, the data model, or the tenancy boundary does.
 Number sequentially, never renumber, and never delete: a superseded ADR gets its status
 changed and a pointer to the record that replaced it. The history is the value.
 
+## ADR-0002 through 0005 in one paragraph each
+
+**0002 — Incident storage.** `incidents` gets first-class SQL columns for everything Pyra
+queries on, plus a `payload jsonb` holding the NERIS-shaped incident, validated by the
+generated zod schema on every write. 464 component schemas are reachable from the incident
+payload roots and upstream is still moving them; mirroring that into tables would make every
+NERIS release a multi-table migration. The cost is no referential integrity inside the payload
+and harder analytics, and the mitigation is a standing rule — promote a field to a real column
+the moment we filter or join on it.
+
+**0003 — Tenancy.** The API connects as a non-owner `pyra_app` role; every domain table gets
+`ENABLE` + `FORCE ROW LEVEL SECURITY` with policies keyed on `current_setting('app.department_id')`,
+and a `withTenant()` helper is the only way to set it. Application-level scoping works until one
+query forgets, and that failure is a silent cross-tenant leak. The carve-out is written down:
+better-auth queries the four auth tables with no department in scope, so RLS there would break
+sign-in — tenancy on those is enforced in procedure code and proven by integration tests.
+
+**0004 — `@pyra/neris` is generated.** An in-repo generator reads the local NERIS checkout and
+emits zod schemas, value sets, and the NFIRS crosswalk into `src/generated/`, and that output is
+committed so a dictionary bump arrives as a reviewable diff. Runtime validation has to work
+offline in the browser, which rules out types-only generators. The revisit trigger is explicit:
+over ~600 lines of generator, or any hand-patched output, and we switch to `openapi-zod-client`.
+
+**0005 — Imports are records.** Imported legacy incidents carry `source = 'nfirs_import'` or
+`'vendor_import'` and never enter the NERIS submission pipeline. NERIS takes current incidents;
+a 1987 structure fire is the department's own record — stored, searchable, exportable, with the
+original row preserved verbatim. It is the difference between "import forty years of history"
+being a two-week feature and a compliance catastrophe.
+
 ## Not written yet
 
-Decisions taken but not recorded — each needs an ADR before Phase 1 closes:
+Decisions taken but not recorded. Each needs an ADR before the phase that depends on it closes:
 
-- Tenancy enforcement: Postgres RLS versus application-level scoping.
-- NERIS type generation: generated-and-committed versus generated at build time.
-- Offline sync conflict resolution for the PWA draft queue.
+- Offline sync conflict resolution for the PWA draft queue — which write wins when a draft
+  edited on a phone and a draft edited in the station both reach the server.
 - Governance and entity structure — nonprofit or cooperative, and the mechanism that makes
-  "cannot be acquired" more than an intention.
+  "cannot be acquired" more than an intention. Tracked in
+  [`GOVERNANCE.md`](https://github.com/saintparish4/pyra/blob/master/GOVERNANCE.md) until it
+  is decided.
