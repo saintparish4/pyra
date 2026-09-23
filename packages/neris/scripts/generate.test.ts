@@ -9,7 +9,10 @@ import { hasNerisCheckout } from "./lib/spec.js";
 describe.skipIf(!hasNerisCheckout())("generate", () => {
 	it("regenerating the dictionary produces no diff", () => {
 		for (const file of build().files) {
-			expect(readGenerated(file.relativePath), `${file.relativePath} is stale`).toBe(file.contents);
+			expect(
+				readGenerated(file.relativePath),
+				`${file.relativePath} is stale`,
+			).toBe(file.contents);
 		}
 	});
 

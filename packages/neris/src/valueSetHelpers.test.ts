@@ -15,7 +15,13 @@ function entry(value: string, active: boolean): ValueSetEntry {
 	};
 }
 
-const values = ["FIRE", "FIRE||STRUCTURE_FIRE", "FIRE||OUTSIDE_FIRE", "MEDICAL", "RETIRED"] as const;
+const values = [
+	"FIRE",
+	"FIRE||STRUCTURE_FIRE",
+	"FIRE||OUTSIDE_FIRE",
+	"MEDICAL",
+	"RETIRED",
+] as const;
 const meta: Readonly<Record<(typeof values)[number], ValueSetEntry>> = {
 	FIRE: entry("FIRE", true),
 	"FIRE||STRUCTURE_FIRE": entry("FIRE||STRUCTURE_FIRE", true),
@@ -26,7 +32,11 @@ const meta: Readonly<Record<(typeof values)[number], ValueSetEntry>> = {
 
 describe("offerableValues", () => {
 	it("omits retired values so they cannot be chosen for a new record", () => {
-		expect(offerableValues(values, meta)).toEqual(["FIRE", "FIRE||STRUCTURE_FIRE", "MEDICAL"]);
+		expect(offerableValues(values, meta)).toEqual([
+			"FIRE",
+			"FIRE||STRUCTURE_FIRE",
+			"MEDICAL",
+		]);
 	});
 
 	it("still labels a retired value, so an old record stays readable", () => {
@@ -40,7 +50,10 @@ describe("childrenOf", () => {
 	});
 
 	it("descends exactly one level", () => {
-		expect(childrenOf(values, ["FIRE"])).toEqual(["FIRE||STRUCTURE_FIRE", "FIRE||OUTSIDE_FIRE"]);
+		expect(childrenOf(values, ["FIRE"])).toEqual([
+			"FIRE||STRUCTURE_FIRE",
+			"FIRE||OUTSIDE_FIRE",
+		]);
 	});
 
 	it("returns nothing for a leaf, so a picker knows when to stop", () => {

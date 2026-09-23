@@ -4,7 +4,14 @@ import { hashPassword } from "better-auth/crypto";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { accounts, auditLog, db, departments, users, withTenant } from "@pyra/db";
+import {
+	accounts,
+	auditLog,
+	db,
+	departments,
+	users,
+	withTenant,
+} from "@pyra/db";
 import { type DepartmentId, departmentIdSchema } from "@pyra/shared";
 
 import { buildApp } from "../app.js";
@@ -45,7 +52,11 @@ async function seedTenant(slug: string, role: string): Promise<Tenant> {
 		providerId: "credential",
 		password: await hashPassword(PASSWORD),
 	});
-	return { departmentId: departmentIdSchema.parse(department.id), userId, email };
+	return {
+		departmentId: departmentIdSchema.parse(department.id),
+		userId,
+		email,
+	};
 }
 
 async function writeAudit(tenant: Tenant, entityId: string): Promise<void> {
@@ -60,7 +71,9 @@ async function writeAudit(tenant: Tenant, entityId: string): Promise<void> {
 	);
 }
 
-function toCookieHeader(setCookie: string | string[] | number | undefined): string {
+function toCookieHeader(
+	setCookie: string | string[] | number | undefined,
+): string {
 	const entries = Array.isArray(setCookie) ? setCookie : [setCookie];
 	return entries
 		.filter((entry): entry is string => typeof entry === "string")
@@ -109,7 +122,9 @@ describe("row-level security", () => {
 		await writeAudit(alpha, "incident-alpha");
 		await writeAudit(bravo, "incident-bravo");
 
-		const rows = await withTenant(alpha.departmentId, (tx) => tx.select().from(auditLog));
+		const rows = await withTenant(alpha.departmentId, (tx) =>
+			tx.select().from(auditLog),
+		);
 
 		expect(rows).toHaveLength(1);
 		expect(rows[0]?.entityId).toBe("incident-alpha");
@@ -131,7 +146,9 @@ describe("row-level security", () => {
 			),
 		).rejects.toThrow();
 
-		const rows = await withTenant(bravo.departmentId, (tx) => tx.select().from(auditLog));
+		const rows = await withTenant(bravo.departmentId, (tx) =>
+			tx.select().from(auditLog),
+		);
 		expect(rows).toHaveLength(0);
 	});
 
@@ -155,7 +172,10 @@ describe("audit.list", () => {
 		await writeAudit(alpha, "incident-alpha");
 		await writeAudit(bravo, "incident-bravo");
 
-		const response = await listAudit(await signIn(alpha.email), alpha.departmentId);
+		const response = await listAudit(
+			await signIn(alpha.email),
+			alpha.departmentId,
+		);
 
 		expect(response.statusCode).toBe(200);
 		const rows = response.json().result.data as { entityId: string }[];
@@ -167,7 +187,10 @@ describe("audit.list", () => {
 		const bravo = await seedTenant("bravo", "officer");
 		await writeAudit(bravo, "incident-bravo");
 
-		const response = await listAudit(await signIn(alpha.email), bravo.departmentId);
+		const response = await listAudit(
+			await signIn(alpha.email),
+			bravo.departmentId,
+		);
 
 		expect(response.statusCode).toBe(403);
 	});
@@ -175,7 +198,10 @@ describe("audit.list", () => {
 	it("refuses a role that cannot read the audit log", async () => {
 		const alpha = await seedTenant("alpha", "member");
 
-		const response = await listAudit(await signIn(alpha.email), alpha.departmentId);
+		const response = await listAudit(
+			await signIn(alpha.email),
+			alpha.departmentId,
+		);
 
 		expect(response.statusCode).toBe(403);
 	});

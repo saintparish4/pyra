@@ -1,6 +1,10 @@
 import { load } from "js-yaml";
 
-import { NERIS_SPEC_SCHEMA_DIGEST, NERIS_SPEC_SERVER_URL, NERIS_SPEC_VERSION } from "../src/generated/version.js";
+import {
+	NERIS_SPEC_SCHEMA_DIGEST,
+	NERIS_SPEC_SERVER_URL,
+	NERIS_SPEC_VERSION,
+} from "../src/generated/version.js";
 import { schemaDigest, type SchemaNode } from "./lib/spec.js";
 
 /**
@@ -18,7 +22,9 @@ async function main(): Promise<void> {
 
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error(`GET ${url} returned ${response.status} ${response.statusText}`);
+		throw new Error(
+			`GET ${url} returned ${response.status} ${response.statusText}`,
+		);
 	}
 	const document = load(await response.text());
 	if (typeof document !== "object" || document === null) {
@@ -35,17 +41,28 @@ async function main(): Promise<void> {
 	}
 
 	const liveDigest = schemaDigest(liveSchemas);
-	if (liveVersion === NERIS_SPEC_VERSION && liveDigest === NERIS_SPEC_SCHEMA_DIGEST) {
+	if (
+		liveVersion === NERIS_SPEC_VERSION &&
+		liveDigest === NERIS_SPEC_SCHEMA_DIGEST
+	) {
 		console.log(`NERIS ${liveVersion} matches the generated snapshot.`);
 		return;
 	}
 
 	console.error(`NERIS spec drift detected against ${url}`);
-	console.error(`  generated from: ${NERIS_SPEC_VERSION} (${NERIS_SPEC_SCHEMA_DIGEST.slice(0, 12)})`);
-	console.error(`  live:           ${liveVersion} (${liveDigest.slice(0, 12)})`);
+	console.error(
+		`  generated from: ${NERIS_SPEC_VERSION} (${NERIS_SPEC_SCHEMA_DIGEST.slice(0, 12)})`,
+	);
+	console.error(
+		`  live:           ${liveVersion} (${liveDigest.slice(0, 12)})`,
+	);
 	console.error("");
-	console.error("Refresh the NERIS/ checkout, then run: pnpm --filter @pyra/neris generate");
-	console.error("Review the diff in src/generated/ before committing — that diff is the change review.");
+	console.error(
+		"Refresh the NERIS/ checkout, then run: pnpm --filter @pyra/neris generate",
+	);
+	console.error(
+		"Review the diff in src/generated/ before committing — that diff is the change review.",
+	);
 	process.exitCode = 1;
 }
 

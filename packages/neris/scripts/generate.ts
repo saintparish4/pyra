@@ -44,7 +44,11 @@ export function generatedDir(): string {
 
 export function build(): BuildResult {
 	const spec = loadSpec();
-	const report: ValueSetReport = { missingFiles: [], unlabelled: [], dropped: [] };
+	const report: ValueSetReport = {
+		missingFiles: [],
+		unlabelled: [],
+		dropped: [],
+	};
 
 	const enums = new Map<string, readonly string[]>();
 	for (const [name, schema] of Object.entries(spec.schemas)) {
@@ -59,7 +63,9 @@ export function build(): BuildResult {
 	}
 
 	const reachable = reachableFrom(spec.schemas, ROOTS);
-	const objectNames = new Set([...reachable].filter((name) => !enums.has(name)));
+	const objectNames = new Set(
+		[...reachable].filter((name) => !enums.has(name)),
+	);
 	const { order, selfReferencing } = topoSort(spec.schemas, objectNames);
 
 	const usedEnums = [...reachable]
@@ -84,8 +90,12 @@ export function build(): BuildResult {
 				"// after the binding exists.",
 			);
 		}
-		schemaLines.push(`export const ${schemaConst(name)} = ${zodFor(schema, { self: name })};`);
-		schemaLines.push(`export type ${name} = z.infer<typeof ${schemaConst(name)}>;`);
+		schemaLines.push(
+			`export const ${schemaConst(name)} = ${zodFor(schema, { self: name })};`,
+		);
+		schemaLines.push(
+			`export type ${name} = z.infer<typeof ${schemaConst(name)}>;`,
+		);
 		schemaLines.push("");
 	}
 
@@ -120,9 +130,15 @@ export function build(): BuildResult {
 	return {
 		report,
 		files: [
-			{ relativePath: "valueSets.ts", contents: prefix + emitValueSets(enums, report) },
+			{
+				relativePath: "valueSets.ts",
+				contents: prefix + emitValueSets(enums, report),
+			},
 			{ relativePath: "schemas.ts", contents: prefix + schemaLines.join("\n") },
-			{ relativePath: "nfirsCrosswalk.ts", contents: prefix + emitCrosswalk(crosswalk) },
+			{
+				relativePath: "nfirsCrosswalk.ts",
+				contents: prefix + emitCrosswalk(crosswalk),
+			},
 			{ relativePath: "version.ts", contents: prefix + version },
 			{ relativePath: "index.ts", contents: prefix + index },
 		],
@@ -145,10 +161,14 @@ function describe(report: ValueSetReport): string[] {
 		);
 	}
 	for (const { set, value } of report.unlabelled) {
-		lines.push(`unlabelled: ${set} carries "${value}", the YAML does not — labelled by its own value`);
+		lines.push(
+			`unlabelled: ${set} carries "${value}", the YAML does not — labelled by its own value`,
+		);
 	}
 	for (const { set, value } of report.dropped) {
-		lines.push(`dropped: the YAML for ${set} carries "${value}", the API does not`);
+		lines.push(
+			`dropped: the YAML for ${set} carries "${value}", the API does not`,
+		);
 	}
 	return lines;
 }

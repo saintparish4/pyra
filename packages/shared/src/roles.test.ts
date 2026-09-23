@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { can, permissions, permissionsFor, userRoleSchema, userRoles } from "./roles.js";
+import {
+	can,
+	permissions,
+	permissionsFor,
+	userRoleSchema,
+	userRoles,
+} from "./roles.js";
 
 describe("userRoles", () => {
 	it("still accepts the roles that existing rows were written with", () => {

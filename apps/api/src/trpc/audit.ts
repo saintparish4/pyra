@@ -4,9 +4,19 @@ import { z } from "zod";
 import { auditLog, type Transaction, withTenant } from "@pyra/db";
 import { departmentIdSchema } from "@pyra/shared";
 
-import { assertOwnDepartment, requirePermission, router } from "./procedures.js";
+import {
+	assertOwnDepartment,
+	requirePermission,
+	router,
+} from "./procedures.js";
 
-export const auditActions = ["create", "update", "delete", "submit", "import"] as const;
+export const auditActions = [
+	"create",
+	"update",
+	"delete",
+	"submit",
+	"import",
+] as const;
 export const auditActionSchema = z.enum(auditActions);
 export type AuditAction = z.infer<typeof auditActionSchema>;
 
@@ -27,7 +37,10 @@ export interface AuditEntry {
  * the mutation it describes commit or roll back together. An audit trail that
  * can record a change which then fails to land is worse than none.
  */
-export async function recordAudit(tx: Transaction, entry: AuditEntry): Promise<void> {
+export async function recordAudit(
+	tx: Transaction,
+	entry: AuditEntry,
+): Promise<void> {
 	await tx.insert(auditLog).values({
 		departmentId: entry.departmentId,
 		actorUserId: entry.actorUserId,

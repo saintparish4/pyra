@@ -1,6 +1,12 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 
-import { can, type DepartmentId, departmentIdSchema, type Permission, userRoleSchema } from "@pyra/shared";
+import {
+	can,
+	type DepartmentId,
+	departmentIdSchema,
+	type Permission,
+	userRoleSchema,
+} from "@pyra/shared";
 
 import type { Context } from "./context.js";
 
@@ -22,7 +28,9 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
  * thing the caller cannot choose.
  */
 export const tenantProcedure = protectedProcedure.use(({ ctx, next }) => {
-	const departmentId = departmentIdSchema.safeParse(ctx.session.user.departmentId);
+	const departmentId = departmentIdSchema.safeParse(
+		ctx.session.user.departmentId,
+	);
 	const role = userRoleSchema.safeParse(ctx.session.user.role);
 	if (!departmentId.success || !role.success) {
 		throw new TRPCError({
@@ -30,13 +38,18 @@ export const tenantProcedure = protectedProcedure.use(({ ctx, next }) => {
 			message: "session carries no usable department scope",
 		});
 	}
-	return next({ ctx: { ...ctx, departmentId: departmentId.data, role: role.data } });
+	return next({
+		ctx: { ...ctx, departmentId: departmentId.data, role: role.data },
+	});
 });
 
 export function requirePermission(permission: Permission) {
 	return tenantProcedure.use(({ ctx, next }) => {
 		if (!can(ctx.role, permission)) {
-			throw new TRPCError({ code: "FORBIDDEN", message: `role ${ctx.role} cannot ${permission}` });
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: `role ${ctx.role} cannot ${permission}`,
+			});
 		}
 		return next();
 	});
@@ -47,8 +60,14 @@ export function requirePermission(permission: Permission) {
  * nothing is indistinguishable from an empty department. Refusing the mismatch
  * outright says which of the two it was.
  */
-export function assertOwnDepartment(scope: DepartmentId, claimed: DepartmentId): void {
+export function assertOwnDepartment(
+	scope: DepartmentId,
+	claimed: DepartmentId,
+): void {
 	if (scope !== claimed) {
-		throw new TRPCError({ code: "FORBIDDEN", message: "department id does not match the session" });
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "department id does not match the session",
+		});
 	}
 }

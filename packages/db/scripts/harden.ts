@@ -44,7 +44,10 @@ async function ensureAppRole(): Promise<void> {
 
 try {
 	await ensureAppRole();
-	const script = readFileSync(resolve(import.meta.dirname, "../sql/tenancy.sql"), "utf8");
+	const script = readFileSync(
+		resolve(import.meta.dirname, "../sql/tenancy.sql"),
+		"utf8",
+	);
 	// A multi-statement script needs the simple query protocol.
 	await sql.unsafe(script).simple();
 	console.log("applied sql/tenancy.sql");

@@ -15,7 +15,10 @@ export function offerableValues<T extends string>(
 }
 
 /** The human label for a value, falling back to the value itself. */
-export function labelOf<T extends string>(value: T, meta: Readonly<Record<T, ValueSetEntry>>): string {
+export function labelOf<T extends string>(
+	value: T,
+	meta: Readonly<Record<T, ValueSetEntry>>,
+): string {
 	return meta[value].label;
 }
 
@@ -26,7 +29,10 @@ export function labelOf<T extends string>(value: T, meta: Readonly<Record<T, Val
  * `MEDICAL||ILLNESS` two, `FIRE||OUTSIDE_FIRE||TRASH_RUBBISH_FIRE` three — so a
  * picker has to ask what exists below a node rather than assume a depth.
  */
-export function childrenOf<T extends string>(values: readonly T[], parent: readonly string[]): T[] {
+export function childrenOf<T extends string>(
+	values: readonly T[],
+	parent: readonly string[],
+): T[] {
 	const prefix = parent.join("||");
 	const depth = parent.length;
 	const seen = new Set<string>();

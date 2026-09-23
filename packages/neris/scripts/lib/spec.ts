@@ -68,7 +68,9 @@ export function loadSpec(): Spec {
 	const serverUrl = doc.servers?.[0]?.url;
 	const schemas = doc.components?.schemas;
 	if (!version || !serverUrl || !schemas) {
-		throw new Error("spec is missing info.version, servers[0].url, or components.schemas");
+		throw new Error(
+			"spec is missing info.version, servers[0].url, or components.schemas",
+		);
 	}
 	return {
 		version,
@@ -99,7 +101,9 @@ export function schemaDigest(schemas: Record<string, SchemaNode>): string {
 		}
 		return sorted;
 	};
-	return createHash("sha256").update(JSON.stringify(canonical(schemas))).digest("hex");
+	return createHash("sha256")
+		.update(JSON.stringify(canonical(schemas)))
+		.digest("hex");
 }
 
 export function refName(ref: string): string {

@@ -3,7 +3,12 @@ import { resolve } from "node:path";
 
 import { load } from "js-yaml";
 
-import { metaConst, schemaConst, valueSetFileName, valuesConst } from "./names.js";
+import {
+	metaConst,
+	schemaConst,
+	valueSetFileName,
+	valuesConst,
+} from "./names.js";
 import { nerisRoot } from "./spec.js";
 
 export interface ValueSetEntry {
@@ -26,7 +31,9 @@ export interface ValueSetReport {
 
 export type RawEntry = Record<string, unknown>;
 
-export function loadValueSetFile(fileName: string): Record<string, RawEntry> | undefined {
+export function loadValueSetFile(
+	fileName: string,
+): Record<string, RawEntry> | undefined {
 	const path = resolve(nerisRoot(), "CORE/value_sets/yml", fileName);
 	if (!existsSync(path)) {
 		return undefined;
@@ -51,7 +58,9 @@ function boolish(entry: RawEntry, key: string, context: string): boolean {
 	if (value === "FALSE") {
 		return false;
 	}
-	throw new Error(`${context}: expected TRUE or FALSE for "${key}", got "${text(entry, key)}"`);
+	throw new Error(
+		`${context}: expected TRUE or FALSE for "${key}", got "${text(entry, key)}"`,
+	);
 }
 
 /**
@@ -59,16 +68,30 @@ function boolish(entry: RawEntry, key: string, context: string): boolean {
  * are rebuilt from the `value_N` columns rather than by splitting the key,
  * because a description containing a colon would make the key ambiguous.
  */
-function entryFor(key: string, raw: RawEntry, context: string): { value: string; entry: ValueSetEntry } {
+function entryFor(
+	key: string,
+	raw: RawEntry,
+	context: string,
+): { value: string; entry: ValueSetEntry } {
 	const hierarchical = raw.value_1 !== undefined;
 	const levels = hierarchical
-		? [text(raw, "value_1"), text(raw, "value_2"), text(raw, "value_3")].filter(Boolean)
+		? [text(raw, "value_1"), text(raw, "value_2"), text(raw, "value_3")].filter(
+				Boolean,
+			)
 		: [key];
 	const labelPath = hierarchical
-		? [text(raw, "description_1"), text(raw, "description_2"), text(raw, "description_3")].filter(Boolean)
+		? [
+				text(raw, "description_1"),
+				text(raw, "description_2"),
+				text(raw, "description_3"),
+			].filter(Boolean)
 		: [text(raw, "description")].filter(Boolean);
 	const definitions = hierarchical
-		? [text(raw, "definition_1"), text(raw, "definition_2"), text(raw, "definition_3")].filter(Boolean)
+		? [
+				text(raw, "definition_1"),
+				text(raw, "definition_2"),
+				text(raw, "definition_3"),
+			].filter(Boolean)
 		: [text(raw, "definition")].filter(Boolean);
 	const value = levels.join("||");
 	return {
@@ -86,7 +109,14 @@ function entryFor(key: string, raw: RawEntry, context: string): { value: string;
 
 function fallback(value: string): ValueSetEntry {
 	const levels = value.split("||");
-	return { label: value, labelPath: [value], levels, definition: "", source: "", active: true };
+	return {
+		label: value,
+		labelPath: [value],
+		levels,
+		definition: "",
+		source: "",
+		active: true,
+	};
 }
 
 /**
@@ -151,7 +181,9 @@ export function emitValueSets(
 		"}",
 		"",
 	];
-	for (const [name, values] of [...enums].sort(([a], [b]) => a.localeCompare(b))) {
+	for (const [name, values] of [...enums].sort(([a], [b]) =>
+		a.localeCompare(b),
+	)) {
 		const joined = joinValueSet(name, values, report);
 		blocks.push(`export const ${valuesConst(name)} = [`);
 		for (const value of values) {
@@ -159,8 +191,12 @@ export function emitValueSets(
 		}
 		blocks.push("] as const;");
 		blocks.push(`export type ${name} = (typeof ${valuesConst(name)})[number];`);
-		blocks.push(`export const ${schemaConst(name)} = z.enum(${valuesConst(name)});`);
-		blocks.push(`export const ${metaConst(name)}: Readonly<Record<${name}, ValueSetEntry>> = {`);
+		blocks.push(
+			`export const ${schemaConst(name)} = z.enum(${valuesConst(name)});`,
+		);
+		blocks.push(
+			`export const ${metaConst(name)}: Readonly<Record<${name}, ValueSetEntry>> = {`,
+		);
 		for (const [value, entry] of joined) {
 			blocks.push(`\t${JSON.stringify(value)}: ${JSON.stringify(entry)},`);
 		}

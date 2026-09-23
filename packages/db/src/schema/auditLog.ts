@@ -1,4 +1,11 @@
-import { index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+	index,
+	jsonb,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { departments } from "./departments.js";
 import { users } from "./users.js";
@@ -33,6 +40,10 @@ export const auditLog = pgTable(
 	},
 	(table) => [
 		index("audit_log_department_at_idx").on(table.departmentId, table.at),
-		index("audit_log_entity_idx").on(table.departmentId, table.entityType, table.entityId),
+		index("audit_log_entity_idx").on(
+			table.departmentId,
+			table.entityType,
+			table.entityId,
+		),
 	],
 );

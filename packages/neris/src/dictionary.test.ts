@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { nfirsCrosswalk } from "./generated/nfirsCrosswalk.js";
 import { patchIncidentActionSchema } from "./generated/schemas.js";
-import { typeIncidentValueMeta, typeIncidentValues } from "./generated/valueSets.js";
+import {
+	typeIncidentValueMeta,
+	typeIncidentValues,
+} from "./generated/valueSets.js";
 import { NERIS_SPEC_VERSION } from "./generated/version.js";
 
 describe("incident types", () => {
@@ -14,25 +17,32 @@ describe("incident types", () => {
 
 	it("carries the API's spelling of BACKCOUNTRY_RESCUE, not the YAML's typo", () => {
 		expect(typeIncidentValues).toContain("RESCUE||OUTSIDE||BACKCOUNTRY_RESCUE");
-		expect(typeIncidentValues).not.toContain("RESCUE||OUTSIDE||BACKOUNTRY_RESCUE");
+		expect(typeIncidentValues).not.toContain(
+			"RESCUE||OUTSIDE||BACKOUNTRY_RESCUE",
+		);
 	});
 
 	it("is variable depth — a picker cannot assume three levels", () => {
 		expect(typeIncidentValueMeta.LAWENFORCE.levels).toEqual(["LAWENFORCE"]);
-		expect(typeIncidentValueMeta["MEDICAL||ILLNESS"].levels).toEqual(["MEDICAL", "ILLNESS"]);
-		expect(typeIncidentValueMeta["FIRE||OUTSIDE_FIRE||TRASH_RUBBISH_FIRE"].levels).toEqual([
-			"FIRE",
-			"OUTSIDE_FIRE",
-			"TRASH_RUBBISH_FIRE",
+		expect(typeIncidentValueMeta["MEDICAL||ILLNESS"].levels).toEqual([
+			"MEDICAL",
+			"ILLNESS",
 		]);
+		expect(
+			typeIncidentValueMeta["FIRE||OUTSIDE_FIRE||TRASH_RUBBISH_FIRE"].levels,
+		).toEqual(["FIRE", "OUTSIDE_FIRE", "TRASH_RUBBISH_FIRE"]);
 	});
 
 	it("labels from the YAML where it has one", () => {
-		expect(typeIncidentValueMeta.LAWENFORCE.label).toBe("Law Enforcement Support");
+		expect(typeIncidentValueMeta.LAWENFORCE.label).toBe(
+			"Law Enforcement Support",
+		);
 	});
 
 	it("falls back to the value as its own label where the YAML has none", () => {
-		expect(typeIncidentValueMeta["MEDICAL||ILLNESS"].label).toBe("MEDICAL||ILLNESS");
+		expect(typeIncidentValueMeta["MEDICAL||ILLNESS"].label).toBe(
+			"MEDICAL||ILLNESS",
+		);
 	});
 });
 
@@ -73,7 +83,9 @@ describe("generated schemas", () => {
 			return result.error?.issues.map((issue) => issue.path.join(".")) ?? [];
 		};
 
-		expect(failedPaths("FD12345678|abc123xyz|1729023498")).not.toContain("neris_id");
+		expect(failedPaths("FD12345678|abc123xyz|1729023498")).not.toContain(
+			"neris_id",
+		);
 		expect(failedPaths("not-an-incident-id")).toContain("neris_id");
 	});
 });

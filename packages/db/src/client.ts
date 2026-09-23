@@ -9,7 +9,8 @@ import * as schema from "./schema/index.js";
  * `DATABASE_URL`. The fallback means a single-department self-host that never
  * creates the second role still works unchanged.
  */
-const connectionString = process.env.APP_DATABASE_URL ?? process.env.DATABASE_URL;
+const connectionString =
+	process.env.APP_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!connectionString) {
 	throw new Error("neither APP_DATABASE_URL nor DATABASE_URL is set");
 }
