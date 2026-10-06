@@ -53,6 +53,12 @@ describe("can", () => {
 });
 
 describe("permissionsFor", () => {
+	it("grants a member everything a read-only user may do", () => {
+		for (const permission of permissionsFor("readonly")) {
+			expect(can("member", permission)).toBe(true);
+		}
+	});
+
 	it("grows monotonically from readonly to officer", () => {
 		for (const role of ["readonly", "member"] as const) {
 			for (const permission of permissionsFor(role)) {
