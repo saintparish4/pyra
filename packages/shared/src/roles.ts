@@ -56,7 +56,7 @@ const MATRIX: Readonly<Record<UserRole, readonly Permission[]>> = {
 };
 
 export function can(role: UserRole, permission: Permission): boolean {
-	return MATRIX[role].includes(permission);
+	return permissionsFor(role).includes(permission);
 }
 
 export function permissionsFor(role: UserRole): readonly Permission[] {
