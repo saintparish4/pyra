@@ -36,3 +36,99 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pyra
+          POSTGRES_PASSWORD: pyra
+          # The suite refuses any database whose name does not end in _test.
+          POSTGRES_DB: pyra_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pyra"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://pyra:pyra@localhost:5432/pyra_test
+      # Throwaway value for a throwaway database; not a secret.
+      BETTER_AUTH_SECRET: ci-integration-only-not-a-real-secret-0000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Setup migrates and applies tenancy.sql itself.
+      - name: Integration tests
+        run: pnpm test:integration
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pyra
+          POSTGRES_PASSWORD: pyra
+          POSTGRES_DB: pyra
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pyra"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Owner role for migrate, harden, and seed, as in deploy/docker-compose.yml.
+      DATABASE_URL: postgresql://pyra:pyra@localhost:5432/pyra
+      PYRA_APP_PASSWORD: ci-e2e-app-password
+      BETTER_AUTH_SECRET: ci-e2e-only-not-a-real-secret-00000000000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @pyra/web exec playwright install --with-deps chromium
+
+      - name: Migrate, harden, seed
+        run: |
+          pnpm --filter @pyra/db migrate
+          pnpm --filter @pyra/db harden
+          pnpm --filter @pyra/api seed
+
+      # The API connects as pyra_app, like the deployed container, so a sign-in
+      # that only works for the owner role fails here rather than in production.
+      - name: End-to-end tests
+        env:
+          APP_DATABASE_URL: postgresql://pyra_app:ci-e2e-app-password@localhost:5432/pyra
+        run: pnpm test:e2e
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/web/test-results/
+          retention-days: 7

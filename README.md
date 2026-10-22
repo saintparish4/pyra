@@ -88,7 +88,7 @@ pnpm test:integration  # Vitest against a real Postgres (apps/api)
 pnpm test:e2e          # Playwright (apps/web)
 ```
 
-CI (`.github/workflows/ci.yml`) runs `lint`, `format:check`, `typecheck`, and `test` on every push to `master` and every PR — the same set the pre-commit hook runs.
+CI (`.github/workflows/ci.yml`) runs `lint`, `format:check`, `typecheck`, and `test` on every push to `master` and every PR — the same set the pre-commit hook runs. Two more jobs run alongside it against a Postgres 16 service container: `test:integration`, and `test:e2e` against a migrated, hardened, and seeded database with the API connecting as `pyra_app`.
 
 Three layers, three tools:
 
